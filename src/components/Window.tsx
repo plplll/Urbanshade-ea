@@ -105,7 +105,7 @@ export const Window = ({ title, children, zIndex, onClose, onFocus }: WindowProp
   return (
     <div
       ref={windowRef}
-      className="absolute rounded-xl glass-panel shadow-2xl flex flex-col overflow-hidden"
+      className="absolute rounded-xl glass-panel shadow-2xl flex flex-col overflow-hidden animate-scale-in"
       style={{
         left: `${position.x}px`,
         top: `${position.y}px`,

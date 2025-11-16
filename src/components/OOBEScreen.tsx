@@ -179,7 +179,7 @@ export const OOBEScreen = ({ onComplete }: OOBEScreenProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black text-white flex items-center justify-center p-8">
+    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black text-white flex items-center justify-center p-8 animate-fade-in">
       <div className="max-w-2xl w-full">
         {step === "welcome" && (
           <div className="text-center space-y-8 animate-fade-in">

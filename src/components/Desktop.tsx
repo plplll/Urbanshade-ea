@@ -13,6 +13,7 @@ export interface App {
   run: () => void;
   minimalInclude?: boolean;
   standardInclude?: boolean;
+  downloadable?: boolean;
 }
 
 export const Desktop = ({ onLogout, onReboot, onCriticalKill, onOpenAdminPanel, onLockdown, onEnterBios }: { onLogout: () => void; onReboot: () => void; onCriticalKill: (processName: string, type?: "kernel" | "virus" | "bluescreen" | "memory" | "corruption" | "overload") => void; onOpenAdminPanel?: () => void; onLockdown?: (protocolName: string) => void; onEnterBios?: () => void; }) => {
@@ -240,241 +241,281 @@ export const Desktop = ({ onLogout, onReboot, onCriticalKill, onOpenAdminPanel, 
       id: "notepad",
       name: "Notepad",
       icon: <StickyNote className="w-11 h-11" />,
-      run: () => openWindow(allApps[26])
+      run: () => openWindow(allApps[26]),
+      downloadable: true
     },
     {
       id: "paint",
       name: "Paint Tool",
       icon: <Palette className="w-11 h-11" />,
-      run: () => openWindow(allApps[27])
+      run: () => openWindow(allApps[27]),
+      downloadable: true
     },
     {
       id: "music-player",
       name: "Media Player",
       icon: <Volume2 className="w-11 h-11" />,
-      run: () => openWindow(allApps[28])
+      run: () => openWindow(allApps[28]),
+      downloadable: true
     },
     {
       id: "weather",
       name: "Weather Monitor",
       icon: <CloudRain className="w-11 h-11" />,
-      run: () => openWindow(allApps[29])
+      run: () => openWindow(allApps[29]),
+      downloadable: true
     },
     {
       id: "clock",
       name: "World Clock",
       icon: <ClockIcon className="w-11 h-11" />,
-      run: () => openWindow(allApps[30])
+      run: () => openWindow(allApps[30]),
+      downloadable: true
     },
     {
       id: "calendar",
       name: "Event Calendar",
       icon: <Calendar className="w-11 h-11" />,
-      run: () => openWindow(allApps[31])
+      run: () => openWindow(allApps[31]),
+      downloadable: true
     },
     {
       id: "notes",
       name: "Advanced Notes",
       icon: <Newspaper className="w-11 h-11" />,
-      run: () => openWindow(allApps[32])
+      run: () => openWindow(allApps[32]),
+      downloadable: true
     },
     {
       id: "vpn",
       name: "Secure VPN",
       icon: <Shield className="w-11 h-11" />,
-      run: () => openWindow(allApps[33])
+      run: () => openWindow(allApps[33]),
+      downloadable: true
     },
     {
       id: "firewall",
       name: "Network Firewall",
       icon: <Shield className="w-11 h-11" />,
-      run: () => openWindow(allApps[34])
+      run: () => openWindow(allApps[34]),
+      downloadable: true
     },
     {
       id: "antivirus",
       name: "Virus Scanner",
       icon: <Shield className="w-11 h-11" />,
-      run: () => openWindow(allApps[35])
+      run: () => openWindow(allApps[35]),
+      downloadable: true
     },
     {
       id: "backup",
       name: "Data Backup",
       icon: <HardDrive className="w-11 h-11" />,
-      run: () => openWindow(allApps[36])
+      run: () => openWindow(allApps[36]),
+      downloadable: true
     },
     {
       id: "compression",
       name: "File Compressor",
       icon: <FileArchive className="w-11 h-11" />,
-      run: () => openWindow(allApps[37])
+      run: () => openWindow(allApps[37]),
+      downloadable: true
     },
     {
       id: "pdf-reader",
       name: "PDF Viewer",
       icon: <PdfIcon className="w-11 h-11" />,
-      run: () => openWindow(allApps[38])
+      run: () => openWindow(allApps[38]),
+      downloadable: true
     },
     {
       id: "spreadsheet",
       name: "Data Sheets",
       icon: <Sheet className="w-11 h-11" />,
-      run: () => openWindow(allApps[39])
+      run: () => openWindow(allApps[39]),
+      downloadable: true
     },
     {
       id: "presentation",
       name: "Slide Maker",
       icon: <Presentation className="w-11 h-11" />,
-      run: () => openWindow(allApps[40])
+      run: () => openWindow(allApps[40]),
+      downloadable: true
     },
     {
       id: "video-editor",
       name: "Video Editor",
       icon: <Video className="w-11 h-11" />,
-      run: () => openWindow(allApps[41])
+      run: () => openWindow(allApps[41]),
+      downloadable: true
     },
     {
       id: "image-viewer",
       name: "Photo Gallery",
       icon: <Image className="w-11 h-11" />,
-      run: () => openWindow(allApps[42])
+      run: () => openWindow(allApps[42]),
+      downloadable: true
     },
     {
       id: "audio-editor",
       name: "Sound Editor",
       icon: <Mic className="w-11 h-11" />,
-      run: () => openWindow(allApps[43])
+      run: () => openWindow(allApps[43]),
+      downloadable: true
     },
     {
       id: "game-center",
       name: "Game Hub",
       icon: <Gamepad2 className="w-11 h-11" />,
-      run: () => openWindow(allApps[44])
+      run: () => openWindow(allApps[44]),
+      downloadable: true
     },
     {
       id: "chat",
       name: "Instant Chat",
       icon: <MessageSquare className="w-11 h-11" />,
-      run: () => openWindow(allApps[45])
+      run: () => openWindow(allApps[45]),
+      downloadable: true
     },
     {
       id: "video-call",
       name: "Video Conference",
       icon: <VideoIcon className="w-11 h-11" />,
-      run: () => openWindow(allApps[46])
+      run: () => openWindow(allApps[46]),
+      downloadable: true
     },
     {
       id: "email-client",
       name: "Mail Client Pro",
       icon: <MailOpen className="w-11 h-11" />,
-      run: () => openWindow(allApps[47])
+      run: () => openWindow(allApps[47]),
+      downloadable: true
     },
     {
       id: "ftp",
       name: "FTP Manager",
       icon: <FolderUp className="w-11 h-11" />,
-      run: () => openWindow(allApps[48])
+      run: () => openWindow(allApps[48]),
+      downloadable: true
     },
     {
       id: "ssh",
       name: "SSH Terminal",
       icon: <TerminalSquare className="w-11 h-11" />,
-      run: () => openWindow(allApps[49])
+      run: () => openWindow(allApps[49]),
+      downloadable: true
     },
     {
       id: "packet-analyzer",
       name: "Packet Sniffer",
       icon: <Network className="w-11 h-11" />,
-      run: () => openWindow(allApps[50])
+      run: () => openWindow(allApps[50]),
+      downloadable: true
     },
     {
       id: "disk-manager",
       name: "Disk Utility",
       icon: <DiskIcon className="w-11 h-11" />,
-      run: () => openWindow(allApps[51])
+      run: () => openWindow(allApps[51]),
+      downloadable: true
     },
     {
       id: "registry",
       name: "Registry Editor",
       icon: <Key className="w-11 h-11" />,
-      run: () => openWindow(allApps[52])
+      run: () => openWindow(allApps[52]),
+      downloadable: true
     },
     {
       id: "performance",
       name: "Performance Analyzer",
       icon: <PerformanceIcon className="w-11 h-11" />,
-      run: () => openWindow(allApps[53])
+      run: () => openWindow(allApps[53]),
+      downloadable: true
     },
     {
       id: "scanner",
       name: "Document Scanner",
       icon: <ScanLine className="w-11 h-11" />,
-      run: () => openWindow(allApps[54])
+      run: () => openWindow(allApps[54]),
+      downloadable: true
     },
     {
       id: "translator",
       name: "Language Translator",
       icon: <Languages className="w-11 h-11" />,
-      run: () => openWindow(allApps[55])
+      run: () => openWindow(allApps[55]),
+      downloadable: true
     },
     {
       id: "dictionary",
       name: "Digital Dictionary",
       icon: <BookOpenCheck className="w-11 h-11" />,
-      run: () => openWindow(allApps[56])
+      run: () => openWindow(allApps[56]),
+      downloadable: true
     },
     {
       id: "encyclopedia",
       name: "Encyclopedia",
       icon: <Globe2 className="w-11 h-11" />,
-      run: () => openWindow(allApps[57])
+      run: () => openWindow(allApps[57]),
+      downloadable: true
     },
     {
       id: "map-viewer",
       name: "Map Navigator",
       icon: <MapPinned className="w-11 h-11" />,
-      run: () => openWindow(allApps[58])
+      run: () => openWindow(allApps[58]),
+      downloadable: true
     },
     {
       id: "gps",
       name: "GPS Tracker",
       icon: <MapPin className="w-11 h-11" />,
-      run: () => openWindow(allApps[59])
+      run: () => openWindow(allApps[59]),
+      downloadable: true
     },
     {
       id: "astronomy",
       name: "Star Chart",
       icon: <Telescope className="w-11 h-11" />,
-      run: () => openWindow(allApps[60])
+      run: () => openWindow(allApps[60]),
+      downloadable: true
     },
     {
       id: "chemistry",
       name: "Chemistry Lab",
       icon: <Beaker className="w-11 h-11" />,
-      run: () => openWindow(allApps[61])
+      run: () => openWindow(allApps[61]),
+      downloadable: true
     },
     {
       id: "physics",
       name: "Physics Simulator",
       icon: <PhysicsIcon className="w-11 h-11" />,
-      run: () => openWindow(allApps[62])
+      run: () => openWindow(allApps[62]),
+      downloadable: true
     },
     {
       id: "biometric",
       name: "Biometric Scanner",
       icon: <Fingerprint className="w-11 h-11" />,
-      run: () => openWindow(allApps[63])
+      run: () => openWindow(allApps[63]),
+      downloadable: true
     },
     {
       id: "encryption",
       name: "File Encryptor",
       icon: <EncryptionIcon className="w-11 h-11" />,
-      run: () => openWindow(allApps[64])
+      run: () => openWindow(allApps[64]),
+      downloadable: true
     },
     {
       id: "password-manager",
       name: "Password Vault",
       icon: <KeyRound className="w-11 h-11" />,
-      run: () => openWindow(allApps[65])
+      run: () => openWindow(allApps[65]),
+      downloadable: true
     }
   ];
 
@@ -490,18 +531,19 @@ export const Desktop = ({ onLogout, onReboot, onCriticalKill, onOpenAdminPanel, 
 
   // Filter apps based on installation type and installed apps
   const apps = allApps.filter(app => {
-    // App Store and system apps are always available
-    const isSystemApp = app.minimalInclude || app.standardInclude || app.id === 'app-store';
-    const isDownloadedApp = installedApps.includes(app.id);
+    // If app is downloadable, only show if installed
+    if (app.downloadable) {
+      return installedApps.includes(app.id);
+    }
     
-    if (isDownloadedApp) return true;
-    
+    // For base apps, filter by install type
     if (installType === 'minimal') {
       return app.minimalInclude === true || app.id === 'app-store';
     } else if (installType === 'standard') {
       return app.minimalInclude === true || app.standardInclude === true || app.id === 'app-store';
     } else {
-      return true; // full installation includes ALL base apps
+      // Full installation shows all base (non-downloadable) apps
+      return true;
     }
   });
 
