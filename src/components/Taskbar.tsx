@@ -20,12 +20,12 @@ export const Taskbar = ({ onStartClick, pinnedApps, onPinnedClick }: TaskbarProp
   };
 
   return (
-    <div className="fixed left-0 right-0 bottom-0 h-[60px] flex justify-between items-center px-5 z-[800] bg-black/60 backdrop-blur-sm border-t border-white/5">
+    <div className="fixed left-0 right-0 bottom-0 h-[60px] flex justify-between items-center px-5 z-[800] bg-black/60 backdrop-blur-sm border-t border-white/5 animate-slide-in-right">
       <div className="flex items-center gap-3">
         <button
           onClick={onStartClick}
           data-start-button
-          className="flex items-center gap-3 px-4 py-2.5 rounded-xl glass-panel hover:bg-white/5 transition-colors"
+          className="flex items-center gap-3 px-4 py-2.5 rounded-xl glass-panel hover:bg-white/5 transition-all duration-200 hover-scale"
         >
           <div className="w-9 h-9 rounded-lg bg-gradient-to-b from-primary to-primary/20 flex items-center justify-center text-black font-extrabold text-lg">
             U
@@ -38,7 +38,7 @@ export const Taskbar = ({ onStartClick, pinnedApps, onPinnedClick }: TaskbarProp
             <button
               key={app.id}
               onClick={() => onPinnedClick(app)}
-              className="w-11 h-11 rounded-lg flex items-center justify-center text-primary hover:bg-white/5 transition-colors"
+              className="w-11 h-11 rounded-lg flex items-center justify-center text-primary hover:bg-white/5 transition-all duration-200 hover-scale"
               title={app.name}
             >
               {app.icon}

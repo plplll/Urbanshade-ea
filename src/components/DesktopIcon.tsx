@@ -70,14 +70,14 @@ export const DesktopIcon = ({ app, onOpen, onDragStart, onDragEnd }: DesktopIcon
   return (
     <div
       ref={iconRef}
-      className={`w-30 flex flex-col items-center gap-2 text-center select-none group ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+      className={`w-30 flex flex-col items-center gap-2 text-center select-none group animate-fade-in ${isDragging ? 'cursor-grabbing scale-110' : 'cursor-grab hover-scale'}`}
       onDoubleClick={() => app.run()}
       onMouseDown={handleMouseDown}
     >
-      <div className={`w-22 h-22 rounded-xl glass-panel flex items-center justify-center text-primary group-hover:urbanshade-glow transition-all ${isDragging ? 'scale-110 shadow-lg' : ''}`}>
+      <div className={`w-22 h-22 rounded-xl glass-panel flex items-center justify-center text-primary group-hover:urbanshade-glow transition-all duration-300 ${isDragging ? 'scale-110 shadow-lg' : ''}`}>
         {app.icon}
       </div>
-      <div className="text-xs text-muted-foreground">{app.name}</div>
+      <div className="text-xs text-muted-foreground transition-colors group-hover:text-foreground">{app.name}</div>
     </div>
   );
 };

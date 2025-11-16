@@ -40,7 +40,7 @@ export const StartMenu = ({ open, apps, onClose, onOpenApp, onReboot, onLogout }
   return (
     <div
       ref={menuRef}
-      className="fixed left-3 bottom-[78px] w-[680px] h-[740px] rounded-2xl backdrop-blur-2xl bg-background/95 border border-border/50 z-[900] shadow-2xl overflow-hidden"
+      className="fixed left-3 bottom-[78px] w-[680px] h-[740px] rounded-2xl backdrop-blur-2xl bg-background/95 border border-border/50 z-[900] shadow-2xl overflow-hidden animate-slide-in-right"
     >
       {/* Search Bar at Top */}
       <div className="p-6 border-b border-border/30">
@@ -69,14 +69,15 @@ export const StartMenu = ({ open, apps, onClose, onOpenApp, onReboot, onLogout }
           </div>
           
           <div className="grid grid-cols-6 gap-3">
-            {filteredApps.slice(0, 18).map(app => (
+            {filteredApps.slice(0, 18).map((app, index) => (
               <button
                 key={app.id}
                 onClick={() => {
                   onOpenApp(app);
                   onClose();
                 }}
-                className="flex flex-col items-center gap-2 p-3 rounded-lg hover:bg-muted/50 transition-all group"
+                className="flex flex-col items-center gap-2 p-3 rounded-lg hover:bg-muted/50 transition-all group animate-fade-in hover-scale"
+                style={{ animationDelay: `${index * 20}ms` }}
               >
                 <div className="w-8 h-8 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
                   {app.icon}
