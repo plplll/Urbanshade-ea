@@ -39,6 +39,7 @@ import { Settings } from "./apps/Settings";
 import { VideoPlayer } from "./apps/VideoPlayer";
 import { ImageViewer } from "./apps/ImageViewer";
 import { PdfReader } from "./apps/PdfReader";
+import { FileReader } from "./apps/FileReader";
 
 interface WindowData {
   id: string;
@@ -121,6 +122,8 @@ export const WindowManager = ({ windows, onClose, onFocus, onMinimize, allWindow
         return <CrashApp onCrash={() => onCriticalKill("SYSTEM_CRASH", "kernel")} />;
       case "settings":
         return <Settings />;
+      case "file-reader":
+        return <FileReader />;
       case "registry":
         return <RegistryEditor />;
       case "disk-manager":

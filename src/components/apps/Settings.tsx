@@ -1271,10 +1271,10 @@ export const Settings = () => {
                   <div className="space-y-2">
                     <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors animate-fade-in">
                       <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary">
-                        RV
+                        AB
                       </div>
                       <div className="flex-1">
-                        <p className="font-medium">RealityVirtual</p>
+                        <p className="font-medium">Aswdbatch</p>
                         <p className="text-sm text-muted-foreground">Lead Developer & Project Creator</p>
                       </div>
                     </div>
