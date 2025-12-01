@@ -58,7 +58,7 @@ export const BiosScreen = ({ onExit }: BiosScreenProps) => {
           <div className="space-y-3 text-sm">
             <div className="flex justify-between">
               <span className="text-gray-400">UEFI Version:</span>
-              <span className="font-mono text-[#0078D7]">2.1.0</span>
+              <span className="font-mono text-[#0078D7]">2.2.0</span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-400">Processor:</span>
@@ -484,7 +484,7 @@ export const BiosScreen = ({ onExit }: BiosScreenProps) => {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold mb-1">URBANSHADE UEFI FIRMWARE</h1>
-            <p className="text-sm opacity-80">Version 2.1.0 - Secure Boot Enabled</p>
+            <p className="text-sm opacity-80">Version 2.2.0 - Secure Boot Enabled</p>
           </div>
           <div className="text-right">
             <div className="text-sm opacity-80">System Time</div>

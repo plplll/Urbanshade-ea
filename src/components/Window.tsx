@@ -94,8 +94,9 @@ export const Window = ({ title, children, zIndex, onClose, onFocus, onMinimize }
   };
 
   const handleMinimize = () => {
-    setIsMinimized(true);
-    setTimeout(() => setIsMinimized(false), 100);
+    if (onMinimize) {
+      onMinimize();
+    }
   };
 
   const handleResizeStart = (e: React.MouseEvent) => {

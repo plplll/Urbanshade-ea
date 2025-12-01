@@ -8,6 +8,7 @@ import GettingStarted from "./pages/docs/GettingStarted";
 import Applications from "./pages/docs/Applications";
 import Facility from "./pages/docs/Facility";
 import TerminalGuide from "./pages/docs/TerminalGuide";
+import AdminPanelDocs from "./pages/docs/AdminPanel";
 import Advanced from "./pages/docs/Advanced";
 import Shortcuts from "./pages/docs/Shortcuts";
 import Troubleshooting from "./pages/docs/Troubleshooting";
@@ -32,6 +33,7 @@ const App = () => (
         <Route path="/docs/applications" element={<Applications />} />
         <Route path="/docs/facility" element={<Facility />} />
         <Route path="/docs/terminal" element={<TerminalGuide />} />
+        <Route path="/docs/admin-panel" element={<AdminPanelDocs />} />
         <Route path="/docs/advanced" element={<Advanced />} />
         <Route path="/docs/shortcuts" element={<Shortcuts />} />
         <Route path="/docs/troubleshooting" element={<Troubleshooting />} />

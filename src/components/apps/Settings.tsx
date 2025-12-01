@@ -157,7 +157,7 @@ export const Settings = ({ onUpdate }: { onUpdate?: () => void }) => {
     }
 
     // Get existing accounts
-    const accounts = loadState("urbanshade_accounts", []);
+    const accounts = loadState("accounts", []);
     
     // Check if username already exists
     if (accounts.some((acc: any) => acc.username === newAccountUsername)) {
@@ -182,7 +182,7 @@ export const Settings = ({ onUpdate }: { onUpdate?: () => void }) => {
     };
 
     accounts.push(newAccount);
-    saveState("urbanshade_accounts", accounts);
+    saveState("accounts", accounts);
     
     toast.success(`Account created for ${newAccountUsername}`);
     setShowAddAccountDialog(false);

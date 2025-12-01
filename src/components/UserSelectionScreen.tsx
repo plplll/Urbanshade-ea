@@ -97,7 +97,7 @@ export const UserSelectionScreen = ({ onLogin }: UserSelectionScreenProps) => {
           </div>
           <h1 className="text-4xl font-bold mb-2 text-primary">URBANSHADE</h1>
           <p className="text-sm text-muted-foreground font-mono">
-            SECURE OPERATING SYSTEM v3.2.1
+            SECURE OPERATING SYSTEM v2.2.0
           </p>
           <div className="mt-4 text-xs text-muted-foreground font-mono">
             [CLASSIFIED FACILITY] • DEPTH: 8,247m • PRESSURE: EXTREME

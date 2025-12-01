@@ -1,4 +1,4 @@
-import { ArrowLeft, Terminal, Rocket, Folder, Map, Keyboard, HelpCircle, Zap, Waves } from "lucide-react";
+import { ArrowLeft, Terminal, Rocket, Folder, Map, Keyboard, HelpCircle, Zap, Waves, Shield } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Docs = () => {
@@ -6,7 +6,7 @@ const Docs = () => {
     {
       icon: Rocket,
       title: "Getting Started",
-      description: "New to the facility? Start here! We promise the onboarding won't take as long as actual deep-sea training.",
+      description: "New to the facility? Start here! Learn the ropes before something inevitably goes wrong. Spoiler: Something always goes wrong.",
       link: "/docs/getting-started",
       color: "text-green-500",
       bgColor: "bg-green-500/10",
@@ -15,7 +15,7 @@ const Docs = () => {
     {
       icon: Folder,
       title: "Core Applications",
-      description: "Your digital toolbox. File Explorer, Notepad, Calculator, and other apps you'll pretend to use productively.",
+      description: "Your digital toolbox: File Explorer, Notepad, Calculator, and other apps you'll pretend to use productively. (We see your Solitaire tab.)",
       link: "/docs/applications",
       color: "text-blue-500",
       bgColor: "bg-blue-500/10",
@@ -24,7 +24,7 @@ const Docs = () => {
     {
       icon: Map,
       title: "Facility Applications",
-      description: "The fun stuff! Security cameras, containment monitors, and other apps for managing your totally-not-haunted underwater base.",
+      description: "The fun stuff! Security cameras, containment monitors, and other apps for managing your totally-not-haunted underwater base. Ghosts sold separately.",
       link: "/docs/facility",
       color: "text-purple-500",
       bgColor: "bg-purple-500/10",
@@ -33,16 +33,25 @@ const Docs = () => {
     {
       icon: Terminal,
       title: "Terminal Guide",
-      description: "Feel like a hacker with our command line interface. Green text on black background included, no extra charge.",
+      description: "Feel like a movie hacker with our command line interface. Comes with authentic typing sounds (just kidding, you have to make those yourself).",
       link: "/docs/terminal",
       color: "text-primary",
       bgColor: "bg-primary/10",
       borderColor: "border-primary/30"
     },
     {
+      icon: Shield,
+      title: "Admin Panel",
+      description: "The control panel for chaos enthusiasts. Warning: May cause uncontrollable laughter, confusion, and questioning reality. Side effects include power trips.",
+      link: "/docs/admin-panel",
+      color: "text-purple-500",
+      bgColor: "bg-purple-500/10",
+      borderColor: "border-purple-500/30"
+    },
+    {
       icon: Zap,
       title: "Advanced Features",
-      description: "BIOS, Recovery Mode, Admin Panel, and other ways to break things. Power users only! (Just kidding, anyone can break things.)",
+      description: "BIOS, Recovery Mode, and other ways to pretend you're a systems engineer. No actual engineering degree required. Coffee addiction helps.",
       link: "/docs/advanced",
       color: "text-yellow-500",
       bgColor: "bg-yellow-500/10",
@@ -51,7 +60,7 @@ const Docs = () => {
     {
       icon: Keyboard,
       title: "Keyboard Shortcuts",
-      description: "Because real pros don't use mice. Learn all the key combos and impress absolutely no one.",
+      description: "Learn all the key combos because real pros don't use mice. Impress absolutely no one at parties with your ALT+F4 knowledge!",
       link: "/docs/shortcuts",
       color: "text-orange-500",
       bgColor: "bg-orange-500/10",
@@ -60,7 +69,7 @@ const Docs = () => {
     {
       icon: HelpCircle,
       title: "Troubleshooting",
-      description: "Something broke? Forgot your password? Accidentally triggered a containment breach? We've got you covered.",
+      description: "When things go wrong (and they will). From 'I forgot my password' to 'Why is everything upside down and rainbow colored?'. We've seen it all.",
       link: "/docs/troubleshooting",
       color: "text-red-500",
       bgColor: "bg-red-500/10",
@@ -98,41 +107,51 @@ const Docs = () => {
           </h2>
           
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            The only operating system designed for managing fictional underwater research facilities 
-            that definitely don't contain any eldritch horrors.
+            The only operating system designed for managing fictional underwater research facilities. 
+            Now with 100% fewer actual containment breaches than the real thing! (We hope. We think. Probably.) 🐙
           </p>
 
           <div className="flex flex-wrap justify-center gap-4 text-sm text-muted-foreground">
             <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10">
-              🌊 8,247m Below Sea Level
+              🌊 Depth: 8,247m Below Sea Level
             </span>
             <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10">
-              🔬 100% Fictional
+              🔬 100% Fictional (Sadly)
             </span>
             <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10">
-              🎮 0% Actual OS
+              🎮 0% Actual OS Functionality
+            </span>
+            <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10">
+              ☕ Powered by Too Much Coffee
             </span>
           </div>
         </section>
 
         {/* What is this */}
-        <section className="p-6 rounded-xl bg-gradient-to-r from-primary/10 to-blue-500/10 border border-primary/30">
-          <h3 className="text-2xl font-bold mb-4">So, what exactly is this?</h3>
-          <div className="space-y-4 text-muted-foreground">
-            <p>
+        <section className="p-8 rounded-xl bg-gradient-to-br from-primary/20 via-blue-500/10 to-purple-500/20 border-2 border-primary/40 shadow-xl">
+          <h3 className="text-3xl font-bold mb-6 text-primary">So, what exactly is this thing?</h3>
+          <div className="space-y-4 text-muted-foreground leading-relaxed">
+            <p className="text-lg">
               <strong className="text-foreground">URBANSHADE OS</strong> is a web-based simulation of a 
-              retro-futuristic operating system, inspired by the game Pressure. It's like playing pretend, 
-              but with more terminal commands and fewer actual responsibilities.
+              retro-futuristic operating system, lovingly ripped off— err, <em>inspired by</em> the game Pressure. 
+              It's like playing pretend, but with more terminal commands, fewer real consequences, and significantly 
+              more underwater-themed existential dread.
             </p>
             <p>
-              Everything here runs in your browser. Your "files" aren't real files. Your "passwords" 
-              are stored in localStorage (please don't use real passwords). The containment units 
-              contain nothing but your imagination. And the crushing pressure of the deep ocean? 
-              That's just Monday.
+              Everything here runs in your browser. Your "files" aren't real files (sorry, they can't help with your taxes). 
+              Your "passwords" are stored in localStorage (please, <strong className="text-yellow-400">PLEASE</strong> don't use real passwords). 
+              The containment units contain nothing but your imagination and maybe some JSON data. 
+              And the crushing pressure of the deep ocean? That's just JavaScript trying to parse your code.
             </p>
-            <p className="text-primary font-semibold">
-              TL;DR: It's a fun, interactive experience. Click things, explore, and try not to 
-              trigger too many simulated emergencies. 🐙
+            <p className="text-primary font-semibold text-lg border-l-4 border-primary pl-4 bg-black/30 py-3 rounded">
+              <strong>TL;DR:</strong> It's a fun, interactive experience that lets you roleplay as an underwater 
+              facility operator. Click things, explore, break stuff, fix stuff, and try not to trigger too many 
+              simulated emergencies. The monsters aren't real, the stress is optional, but the entertainment is guaranteed! 🐙✨
+            </p>
+            <p className="text-sm text-muted-foreground italic">
+              (Legal disclaimer: Any resemblance to real underwater research stations containing anomalous entities 
+              is purely coincidental and definitely not a government cover-up. Any claims otherwise will be investigated 
+              by entities that definitely don't exist.)
             </p>
           </div>
         </section>
@@ -141,7 +160,8 @@ const Docs = () => {
         <section className="space-y-6">
           <h3 className="text-2xl font-bold text-center">Choose Your Adventure</h3>
           <p className="text-center text-muted-foreground">
-            Pick a topic and dive in. Get it? Dive? Because we're underwater? ...I'll see myself out.
+            Pick a topic and dive in. Get it? Dive? Because we're underwater? ...okay that joke's getting old. 
+            Just pick something already. 🤿
           </p>
           
           <div className="grid gap-4 md:grid-cols-2">
@@ -177,21 +197,21 @@ const Docs = () => {
               <div className="text-3xl mb-2">🔑</div>
               <p className="text-sm text-muted-foreground">
                 Press <kbd className="px-2 py-0.5 bg-black/60 rounded border border-white/20 text-xs">DEL</kbd> during 
-                boot to access BIOS
+                boot to access BIOS. On Chromebook? Just type "del" like a normal person.
               </p>
             </div>
             <div className="p-4 rounded-lg bg-black/40 border border-white/10 text-center">
               <div className="text-3xl mb-2">🔄</div>
               <p className="text-sm text-muted-foreground">
                 Press <kbd className="px-2 py-0.5 bg-black/60 rounded border border-white/20 text-xs">F2</kbd> during 
-                boot for Recovery Mode
+                boot for Recovery Mode. Because sometimes things go REALLY wrong.
               </p>
             </div>
             <div className="p-4 rounded-lg bg-black/40 border border-white/10 text-center">
               <div className="text-3xl mb-2">🤫</div>
               <p className="text-sm text-muted-foreground">
                 Type <code className="px-2 py-0.5 bg-black/60 rounded border border-white/20 text-xs">secret</code> in 
-                Terminal for... secrets
+                Terminal for admin access. Shh, it's a secret. (Not really, everyone knows.)
               </p>
             </div>
           </div>
@@ -200,15 +220,19 @@ const Docs = () => {
         {/* Footer */}
         <footer className="text-center pt-8 border-t border-white/10 space-y-4">
           <p className="text-sm text-muted-foreground">
-            URBANSHADE OS Documentation • v3.2.1 • © 2024 Urbanshade Corporation
+            URBANSHADE OS Documentation • v2.2.0 • © 2024 Urbanshade Corporation  
           </p>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-muted-foreground max-w-2xl mx-auto">
             This is a fictional simulation for entertainment purposes. No actual deep-sea facilities 
             were harmed in the making of this software. Any resemblance to real underwater research 
-            stations containing anomalous entities is purely coincidental. 🐙
+            stations containing anomalous entities is purely coincidental and definitely not a government cover-up. 🐙
           </p>
-          <Link to="/" className="inline-block text-primary hover:underline text-sm">
-            ← Return to Simulation
+          <p className="text-xs text-yellow-400 italic">
+            (If you're reading this from an actual underwater facility, please send help. And snacks. 
+            Preferably waterproof snacks. Do those exist? Asking for a friend.)
+          </p>
+          <Link to="/" className="inline-block text-primary hover:underline text-sm font-semibold">
+            ← Return to Simulation (Escape the Docs)
           </Link>
         </footer>
       </main>

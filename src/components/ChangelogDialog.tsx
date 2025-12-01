@@ -5,7 +5,8 @@ import { Sparkles, Check } from "lucide-react";
 
 export const ChangelogDialog = () => {
   const [open, setOpen] = useState(false);
-  const currentVersion = "2.1";
+  const [selectedVersion, setSelectedVersion] = useState("2.2");
+  const currentVersion = "2.2";
 
   useEffect(() => {
     const lastSeenVersion = localStorage.getItem("urbanshade_last_seen_version");
@@ -19,46 +20,114 @@ export const ChangelogDialog = () => {
     setOpen(false);
   };
 
-  const changelog = {
-    "New Features": [
-      "Redesigned BIOS to modern UEFI interface",
-      "Added proper app installer with configuration options",
-      "File Reader now supports editing files",
-      "Enhanced Task Manager with more detailed process information",
-      "Improved Emergency Protocols with additional options",
-      "Added 'Open with File Reader' integration in File Explorer"
-    ],
-    "Improvements": [
-      "Recovery Mode now uses consistent Urbanshade theme",
-      "Settings now have more functional options",
-      "Enhanced hallway visuals in Facility Planner",
-      "Better UI consistency across all applications",
-      "Improved contributor attribution (Aswdbatch)",
-      "Better facility plan export functionality"
-    ],
-    "Bug Fixes": [
-      "Fixed File Reader not appearing in app list",
-      "Fixed Facility Planner room selection issues",
-      "Corrected version numbers throughout system",
-      "Various stability improvements"
-    ],
-    "System Updates": [
-      "Updated to Urbanshade OS v2.1",
-      "Improved performance and responsiveness",
-      "Better error handling throughout the system",
-      "Enhanced animations and transitions"
-    ]
+  const changelogs: Record<string, Record<string, string[]>> = {
+    "2.2": {
+      "New Features": [
+        "Added comprehensive Documentation System with 7 detailed guide pages",
+        "Power menu now includes 'Reboot Options' dropdown with BIOS and Recovery shortcuts",
+        "Created multi-version changelog viewer to track update history",
+        "Enhanced disclaimer screen with detailed privacy and security information"
+      ],
+      "Improvements": [
+        "Documentation includes jokes and personality for better user experience",
+        "Improved startup disclaimer with clearer data storage explanations",
+        "Better navigation between documentation pages",
+        "Enhanced visual consistency across system components"
+      ],
+      "Bug Fixes": [
+        "Fixed window minimize functionality - windows now properly minimize to taskbar",
+        "Fixed new user accounts not appearing on login screen",
+        "Improved account persistence across sessions"
+      ],
+      "Documentation": [
+        "Getting Started guide for new users",
+        "Core Applications reference",
+        "Facility Applications guide",
+        "Terminal command reference",
+        "Advanced Features documentation",
+        "Keyboard Shortcuts reference",
+        "Troubleshooting guide"
+      ]
+    },
+    "2.1": {
+      "New Features": [
+        "Redesigned BIOS to modern UEFI interface",
+        "Added proper app installer with configuration options",
+        "File Reader now supports editing files",
+        "Enhanced Task Manager with more detailed process information",
+        "Improved Emergency Protocols with additional options",
+        "Added 'Open with File Reader' integration in File Explorer"
+      ],
+      "Improvements": [
+        "Recovery Mode now uses consistent Urbanshade theme",
+        "Settings now have more functional options",
+        "Enhanced hallway visuals in Facility Planner",
+        "Better UI consistency across all applications",
+        "Improved contributor attribution (Aswdbatch)",
+        "Better facility plan export functionality"
+      ],
+      "Bug Fixes": [
+        "Fixed File Reader not appearing in app list",
+        "Fixed Facility Planner room selection issues",
+        "Corrected version numbers throughout system",
+        "Various stability improvements"
+      ],
+      "System Updates": [
+        "Updated to Urbanshade OS v2.1",
+        "Improved performance and responsiveness",
+        "Better error handling throughout the system",
+        "Enhanced animations and transitions"
+      ]
+    },
+    "2.0": {
+      "Major Changes": [
+        "Complete rewrite using React and Tailwind CSS",
+        "Modern component-based architecture",
+        "Improved performance and maintainability",
+        "Enhanced visual design system"
+      ],
+      "New Foundation": [
+        "TypeScript for better code quality",
+        "Vite for faster development",
+        "Modern build pipeline",
+        "Responsive design system"
+      ]
+    }
   };
+
+  const changelog = changelogs[selectedVersion] || changelogs["2.2"];
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto animate-scale-in">
+      <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto animate-scale-in">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-2xl">
             <Sparkles className="w-6 h-6 text-primary animate-pulse" />
-            What's New in URBANSHADE OS v{currentVersion}
+            URBANSHADE OS Updates
           </DialogTitle>
         </DialogHeader>
+
+        {/* Version Selector */}
+        <div className="flex gap-2 flex-wrap mb-4">
+          {Object.keys(changelogs).map((version) => (
+            <button
+              key={version}
+              onClick={() => setSelectedVersion(version)}
+              className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+                selectedVersion === version
+                  ? "bg-primary text-black"
+                  : "bg-black/40 border border-white/10 hover:border-primary/50"
+              }`}
+            >
+              v{version}
+            </button>
+          ))}
+        </div>
+
+        <div className="text-sm text-muted-foreground mb-4">
+          {selectedVersion === currentVersion && <span className="text-primary font-semibold">Latest Version</span>}
+          {selectedVersion === "2.0" && <span className="text-yellow-500">Foundation Release - React Migration</span>}
+        </div>
 
         <div className="space-y-6 py-4">
           {Object.entries(changelog).map(([section, items], sectionIndex) => (

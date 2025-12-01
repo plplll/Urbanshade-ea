@@ -106,25 +106,36 @@ const Advanced = () => {
           <div className="p-6 rounded-lg bg-primary/10 border border-primary/30 space-y-4">
             <p className="text-muted-foreground">
               The Admin Panel gives you godlike control over the system. 
-              With great power comes great potential for chaos.
+              With great power comes great potential for chaos. And by chaos, we mean glorious, 
+              rainbow-colored, glitch-filled chaos.
             </p>
             <div className="space-y-2">
               <h4 className="font-bold text-primary">How to access:</h4>
               <ul className="space-y-1 text-sm text-muted-foreground ml-4">
                 <li>• Type <code className="bg-black/50 px-2 py-0.5 rounded">secret</code> in the Terminal</li>
-                <li>• Wait for the magic to happen</li>
-                <li>• Don't tell anyone we told you this</li>
+                <li>• Or use the browser console: <code className="bg-black/50 px-2 py-0.5 rounded">adminPanel()</code></li>
+                <li>• Or find the password hidden in the HTML source (good luck!)</li>
               </ul>
             </div>
             <div className="space-y-2">
-              <h4 className="font-bold text-primary">Admin Powers:</h4>
+              <h4 className="font-bold text-primary">What you can do:</h4>
               <ul className="space-y-1 text-sm text-muted-foreground ml-4">
-                <li>• Disable/enable security features</li>
-                <li>• Trigger system events</li>
-                <li>• Manage facility systems</li>
-                <li>• Access classified information</li>
-                <li>• Break things in creative ways</li>
+                <li>• Apply visual effects (rainbow mode, glitch mode, matrix mode, etc.)</li>
+                <li>• Modify system behavior (rotate, shake, blur everything)</li>
+                <li>• Disable security features (at your own risk)</li>
+                <li>• Create custom crash screens (for... reasons)</li>
+                <li>• Trigger random chaos events</li>
+                <li>• Break things in creative and reversible ways</li>
               </ul>
+            </div>
+            <div className="p-3 rounded bg-yellow-500/10 border border-yellow-500/30">
+              <p className="text-sm text-yellow-500">
+                <span className="font-bold">📖 Want the full guide?</span> Check out the{" "}
+                <Link to="/docs/admin-panel" className="underline hover:text-yellow-400">
+                  Admin Panel documentation
+                </Link>
+                {" "}for detailed instructions and creative chaos ideas.
+              </p>
             </div>
           </div>
         </section>
@@ -203,7 +214,7 @@ const Advanced = () => {
         </section>
 
         <div className="flex justify-between pt-8 border-t border-white/10">
-          <Link to="/docs/terminal" className="text-primary hover:underline">← Terminal Guide</Link>
+          <Link to="/docs/admin-panel" className="text-primary hover:underline">← Admin Panel</Link>
           <Link to="/docs/shortcuts" className="text-primary hover:underline">Keyboard Shortcuts →</Link>
         </div>
       </main>
