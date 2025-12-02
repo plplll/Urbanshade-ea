@@ -167,7 +167,7 @@ export const WindowManager = ({ windows, onClose, onFocus, onMinimize, allWindow
       case "file-reader":
         return <FileReader />;
       case "installer":
-        return <UrbanshadeInstaller onComplete={() => {
+        return <GenericInstaller onComplete={() => {
           const windowId = windows.find(w => w.app.id === appId)?.id;
           if (windowId) onCloseWindow(windowId);
         }} />;

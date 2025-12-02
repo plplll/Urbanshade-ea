@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import { Package, Check, Download, Settings, X } from "lucide-react";
+import { Package, Check, Download, Shield, Sparkles, HardDrive, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { Progress } from "@/components/ui/progress";
 
 interface GenericInstallerProps {
   appName?: string;
@@ -9,25 +10,26 @@ interface GenericInstallerProps {
   onComplete?: () => void;
 }
 
-export const GenericInstaller = ({ appName = "Application", appId, installerId, onComplete }: GenericInstallerProps) => {
-  // Load installer data if not provided
+export const GenericInstaller = ({ appName, appId, installerId, onComplete }: GenericInstallerProps) => {
+  // Load installer data from localStorage
   const installerData = (() => {
-    if (appName && appId) return { appName, appId, installerId };
-    
     const stored = localStorage.getItem('current_installer');
     if (stored) {
       const parsed = JSON.parse(stored);
       return {
-        appName: parsed.appName || appName,
-        appId: parsed.appId || appId,
-        installerId: parsed.id || installerId
+        appName: appName || parsed.appName || "Application",
+        appId: appId || parsed.appId,
+        installerId: installerId || parsed.id
       };
     }
-    return { appName, appId, installerId };
+    return { appName: appName || "Application", appId, installerId };
   })();
-  const [stage, setStage] = useState<"welcome" | "configure" | "installing" | "complete">("welcome");
+
+  const [stage, setStage] = useState<"welcome" | "license" | "configure" | "installing" | "complete">("welcome");
   const [progress, setProgress] = useState(0);
-  const [installLocation, setInstallLocation] = useState("C:\\Program Files\\Urbanshade");
+  const [currentTask, setCurrentTask] = useState("");
+  const [acceptLicense, setAcceptLicense] = useState(false);
+  const [installLocation, setInstallLocation] = useState(`C:\\Program Files\\Urbanshade\\${installerData.appName}`);
   const [options, setOptions] = useState({
     desktopShortcut: true,
     startMenu: true,
@@ -35,18 +37,40 @@ export const GenericInstaller = ({ appName = "Application", appId, installerId, 
     fileAssociations: true,
   });
 
+  const installTasks = [
+    "Preparing installation...",
+    "Extracting files...",
+    "Installing core components...",
+    "Registering DLL files...",
+    "Configuring application...",
+    "Creating shortcuts...",
+    "Updating system registry...",
+    "Finalizing installation..."
+  ];
+
   useEffect(() => {
     if (stage === "installing") {
+      let taskIndex = 0;
       const interval = setInterval(() => {
         setProgress(prev => {
-          if (prev >= 100) {
+          const newProgress = prev + 1.5;
+          
+          // Update task based on progress
+          const newTaskIndex = Math.floor((newProgress / 100) * installTasks.length);
+          if (newTaskIndex !== taskIndex && newTaskIndex < installTasks.length) {
+            taskIndex = newTaskIndex;
+            setCurrentTask(installTasks[newTaskIndex]);
+          }
+          
+          if (newProgress >= 100) {
             clearInterval(interval);
-            setTimeout(() => setStage("complete"), 500);
+            setTimeout(() => setStage("complete"), 800);
             return 100;
           }
-          return prev + 2;
+          return newProgress;
         });
-      }, 50);
+      }, 60);
+      setCurrentTask(installTasks[0]);
       return () => clearInterval(interval);
     }
   }, [stage]);
@@ -75,145 +99,209 @@ export const GenericInstaller = ({ appName = "Application", appId, installerId, 
     // Clear current installer data
     localStorage.removeItem('current_installer');
 
-    if (options.startMenu) {
-      toast.success(`${installerData.appName} installed successfully!`);
-    }
-    
-    // Trigger storage event to update UI
+    // Add notification
+    const notifications = JSON.parse(localStorage.getItem('system_notifications') || '[]');
+    notifications.unshift({
+      id: Date.now().toString(),
+      title: "Installation Complete",
+      message: `${installerData.appName} has been installed successfully.`,
+      time: new Date().toISOString(),
+      read: false,
+      type: "success"
+    });
+    localStorage.setItem('system_notifications', JSON.stringify(notifications));
+
+    toast.success(`${installerData.appName} installed successfully!`);
     window.dispatchEvent(new Event('storage'));
-    
     onComplete?.();
   };
 
   return (
-    <div className="h-full flex flex-col bg-gradient-to-br from-[#001f3f] via-[#003d5c] to-[#001f3f] text-white">
+    <div className="h-full flex flex-col bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white overflow-hidden">
+      {/* Animated Background */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "1s" }} />
+      </div>
+
       {/* Header */}
-      <div className="border-b border-[#0078D7]/30 bg-[#0078D7]/10 p-4 flex items-center gap-3">
-        <Package className="w-6 h-6 text-[#0078D7]" />
-        <div>
-          <h1 className="text-lg font-bold">{installerData.appName} Setup</h1>
-          <p className="text-xs opacity-70">Installation Wizard</p>
+      <div className="relative border-b border-white/10 bg-white/5 backdrop-blur-sm p-5 flex items-center gap-4">
+        <div className="p-3 rounded-xl bg-primary/20 border border-primary/30 animate-scale-in">
+          <Package className="w-8 h-8 text-primary" />
+        </div>
+        <div className="animate-fade-in">
+          <h1 className="text-xl font-bold">{installerData.appName} Setup Wizard</h1>
+          <p className="text-sm text-white/60">Urbanshade Installation System v2.4</p>
+        </div>
+      </div>
+
+      {/* Progress Steps */}
+      <div className="relative border-b border-white/10 bg-white/5 px-6 py-4">
+        <div className="flex justify-between items-center max-w-xl mx-auto">
+          {["Welcome", "License", "Options", "Install", "Complete"].map((step, i) => {
+            const stages = ["welcome", "license", "configure", "installing", "complete"];
+            const currentIndex = stages.indexOf(stage);
+            const isActive = i <= currentIndex;
+            const isCurrent = i === currentIndex;
+            
+            return (
+              <div key={step} className="flex items-center">
+                <div className={`flex flex-col items-center transition-all duration-300 ${isActive ? "opacity-100" : "opacity-40"}`}>
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 ${
+                    isCurrent ? "bg-primary text-white scale-110 ring-4 ring-primary/30" : 
+                    isActive ? "bg-green-500 text-white" : "bg-white/20 text-white/60"
+                  }`}>
+                    {isActive && i < currentIndex ? <Check className="w-4 h-4" /> : i + 1}
+                  </div>
+                  <span className="text-xs mt-1 hidden sm:block">{step}</span>
+                </div>
+                {i < 4 && <div className={`w-12 h-0.5 mx-2 transition-all duration-500 ${i < currentIndex ? "bg-green-500" : "bg-white/20"}`} />}
+              </div>
+            );
+          })}
         </div>
       </div>
 
       {/* Content */}
-      <div className="flex-1 p-6 overflow-auto">
+      <div className="relative flex-1 p-6 overflow-auto">
         {stage === "welcome" && (
           <div className="max-w-xl mx-auto space-y-6 animate-fade-in">
             <div className="text-center space-y-4">
-              <div className="w-20 h-20 mx-auto bg-[#0078D7]/20 rounded-full flex items-center justify-center border-2 border-[#0078D7] animate-scale-in">
-                <Package className="w-12 h-12 text-[#0078D7]" />
+              <div className="w-24 h-24 mx-auto bg-gradient-to-br from-primary/30 to-blue-500/30 rounded-2xl flex items-center justify-center border border-primary/30 animate-scale-in shadow-lg shadow-primary/20">
+                <Sparkles className="w-12 h-12 text-primary animate-pulse" />
               </div>
-              <h2 className="text-2xl font-bold">Welcome to {installerData.appName} Setup</h2>
-              <p className="text-gray-300">
-                This wizard will guide you through the installation of {installerData.appName}.
+              <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent">
+                Welcome to {installerData.appName}
+              </h2>
+              <p className="text-white/70 leading-relaxed">
+                This wizard will guide you through the installation of <span className="text-primary font-semibold">{installerData.appName}</span> on your Urbanshade system.
               </p>
             </div>
 
-            <div className="bg-[#0078D7]/10 border border-[#0078D7]/30 rounded-lg p-4">
-              <p className="text-sm text-gray-300">
-                It is recommended that you close all other applications before continuing.
-                Click Next to continue, or Cancel to exit Setup.
-              </p>
+            <div className="bg-white/5 border border-white/10 rounded-xl p-5 space-y-3">
+              <h3 className="font-semibold flex items-center gap-2">
+                <Shield className="w-4 h-4 text-green-400" />
+                Before you continue:
+              </h3>
+              <ul className="text-sm text-white/70 space-y-2 ml-6 list-disc">
+                <li>Close all other applications</li>
+                <li>Ensure you have administrator privileges</li>
+                <li>Estimated installation time: 2-5 minutes</li>
+              </ul>
             </div>
+          </div>
+        )}
+
+        {stage === "license" && (
+          <div className="max-w-xl mx-auto space-y-6 animate-fade-in">
+            <h2 className="text-2xl font-bold">License Agreement</h2>
+            
+            <div className="bg-black/30 border border-white/10 rounded-xl p-4 h-64 overflow-y-auto font-mono text-xs text-white/70">
+              <p className="mb-4">URBANSHADE SOFTWARE LICENSE AGREEMENT</p>
+              <p className="mb-2">Version 2.4.0 - Last Updated: 2025</p>
+              <p className="mb-4">By installing this software, you agree to the following terms:</p>
+              <p className="mb-2">1. GRANT OF LICENSE</p>
+              <p className="mb-4 ml-4">Urbanshade Corporation grants you a non-exclusive license to use this software within the Urbanshade OS environment.</p>
+              <p className="mb-2">2. RESTRICTIONS</p>
+              <p className="mb-4 ml-4">You may not reverse engineer, decompile, or disassemble this software. Unauthorized access to restricted facility systems is prohibited.</p>
+              <p className="mb-2">3. SECURITY NOTICE</p>
+              <p className="mb-4 ml-4">This software may collect usage data for system optimization and security monitoring purposes.</p>
+              <p className="mb-2">4. DISCLAIMER</p>
+              <p className="ml-4">THE SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND. URBANSHADE CORPORATION ASSUMES NO LIABILITY FOR ANY DAMAGES.</p>
+            </div>
+
+            <label className="flex items-center gap-3 p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 cursor-pointer transition-all group">
+              <input
+                type="checkbox"
+                checked={acceptLicense}
+                onChange={(e) => setAcceptLicense(e.target.checked)}
+                className="w-5 h-5 accent-primary"
+              />
+              <span className="group-hover:text-primary transition-colors">I accept the terms of the License Agreement</span>
+            </label>
           </div>
         )}
 
         {stage === "configure" && (
           <div className="max-w-xl mx-auto space-y-6 animate-fade-in">
-            <h2 className="text-xl font-bold mb-4">Installation Options</h2>
+            <h2 className="text-2xl font-bold">Installation Options</h2>
 
             <div className="space-y-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium">Install Location:</label>
+                <label className="text-sm font-medium flex items-center gap-2">
+                  <HardDrive className="w-4 h-4 text-primary" />
+                  Install Location
+                </label>
                 <input
                   type="text"
                   value={installLocation}
                   onChange={(e) => setInstallLocation(e.target.value)}
-                  className="w-full px-3 py-2 bg-black/40 border border-[#0078D7]/50 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#0078D7]/50"
+                  className="w-full px-4 py-3 bg-black/30 border border-white/20 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all font-mono text-sm"
                 />
               </div>
 
-              <div className="space-y-3">
-                <label className="flex items-center gap-3 p-3 rounded bg-white/5 hover:bg-white/10 cursor-pointer transition-all">
-                  <input
-                    type="checkbox"
-                    checked={options.desktopShortcut}
-                    onChange={(e) => setOptions({ ...options, desktopShortcut: e.target.checked })}
-                    className="w-4 h-4 accent-[#0078D7]"
-                  />
-                  <div>
-                    <div className="font-medium">Create desktop shortcut</div>
-                    <div className="text-xs opacity-70">Add an icon to your desktop</div>
-                  </div>
-                </label>
-
-                <label className="flex items-center gap-3 p-3 rounded bg-white/5 hover:bg-white/10 cursor-pointer transition-all">
-                  <input
-                    type="checkbox"
-                    checked={options.startMenu}
-                    onChange={(e) => setOptions({ ...options, startMenu: e.target.checked })}
-                    className="w-4 h-4 accent-[#0078D7]"
-                  />
-                  <div>
-                    <div className="font-medium">Add to Start Menu</div>
-                    <div className="text-xs opacity-70">Create Start Menu entry</div>
-                  </div>
-                </label>
-
-                <label className="flex items-center gap-3 p-3 rounded bg-white/5 hover:bg-white/10 cursor-pointer transition-all">
-                  <input
-                    type="checkbox"
-                    checked={options.quickLaunch}
-                    onChange={(e) => setOptions({ ...options, quickLaunch: e.target.checked })}
-                    className="w-4 h-4 accent-[#0078D7]"
-                  />
-                  <div>
-                    <div className="font-medium">Quick Launch toolbar</div>
-                    <div className="text-xs opacity-70">Pin to taskbar</div>
-                  </div>
-                </label>
-
-                <label className="flex items-center gap-3 p-3 rounded bg-white/5 hover:bg-white/10 cursor-pointer transition-all">
-                  <input
-                    type="checkbox"
-                    checked={options.fileAssociations}
-                    onChange={(e) => setOptions({ ...options, fileAssociations: e.target.checked })}
-                    className="w-4 h-4 accent-[#0078D7]"
-                  />
-                  <div>
-                    <div className="font-medium">Register file associations</div>
-                    <div className="text-xs opacity-70">Associate file types with this application</div>
-                  </div>
-                </label>
+              <div className="space-y-2">
+                {[
+                  { key: "desktopShortcut", label: "Create desktop shortcut", desc: "Add an icon to your desktop for quick access" },
+                  { key: "startMenu", label: "Add to Start Menu", desc: "Create an entry in the Start Menu" },
+                  { key: "quickLaunch", label: "Pin to taskbar", desc: "Add to the taskbar for instant access" },
+                  { key: "fileAssociations", label: "Register file associations", desc: "Open supported files with this application" },
+                ].map(({ key, label, desc }) => (
+                  <label key={key} className="flex items-start gap-4 p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 cursor-pointer transition-all group">
+                    <input
+                      type="checkbox"
+                      checked={options[key as keyof typeof options]}
+                      onChange={(e) => setOptions({ ...options, [key]: e.target.checked })}
+                      className="w-5 h-5 accent-primary mt-0.5"
+                    />
+                    <div>
+                      <div className="font-medium group-hover:text-primary transition-colors">{label}</div>
+                      <div className="text-xs text-white/50">{desc}</div>
+                    </div>
+                  </label>
+                ))}
               </div>
             </div>
           </div>
         )}
 
         {stage === "installing" && (
-          <div className="max-w-xl mx-auto space-y-6 animate-fade-in">
+          <div className="max-w-xl mx-auto space-y-8 animate-fade-in">
             <div className="text-center space-y-4">
-              <Download className="w-16 h-16 mx-auto text-[#0078D7] animate-pulse" />
-              <h2 className="text-xl font-bold">Installing {installerData.appName}</h2>
-              <p className="text-gray-300">Please wait while Setup installs {installerData.appName}...</p>
-            </div>
-
-            <div className="space-y-2">
-              <div className="h-6 bg-white/10 rounded-full overflow-hidden border border-[#0078D7]/30">
-                <div 
-                  className="h-full bg-[#0078D7] transition-all duration-300 flex items-center justify-end pr-2"
-                  style={{ width: `${progress}%` }}
-                >
-                  <span className="text-xs font-bold text-white">{progress}%</span>
+              <div className="w-20 h-20 mx-auto relative">
+                <div className="absolute inset-0 bg-primary/20 rounded-full animate-ping" />
+                <div className="relative w-full h-full bg-gradient-to-br from-primary to-blue-500 rounded-full flex items-center justify-center">
+                  <Loader2 className="w-10 h-10 text-white animate-spin" />
                 </div>
               </div>
-              <p className="text-xs text-gray-400 text-center">
-                {progress < 30 && "Extracting files..."}
-                {progress >= 30 && progress < 60 && "Installing components..."}
-                {progress >= 60 && progress < 90 && "Configuring settings..."}
-                {progress >= 90 && "Finalizing installation..."}
-              </p>
+              <h2 className="text-2xl font-bold">Installing {installerData.appName}</h2>
+              <p className="text-white/60">Please wait while the installation completes...</p>
+            </div>
+
+            <div className="space-y-3">
+              <div className="flex justify-between text-sm">
+                <span className="text-white/60">{currentTask}</span>
+                <span className="font-mono text-primary">{Math.round(progress)}%</span>
+              </div>
+              <div className="h-3 bg-white/10 rounded-full overflow-hidden border border-white/20">
+                <div 
+                  className="h-full bg-gradient-to-r from-primary to-blue-500 transition-all duration-300 relative"
+                  style={{ width: `${progress}%` }}
+                >
+                  <div className="absolute inset-0 bg-white/20 animate-pulse" />
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-black/30 border border-white/10 rounded-xl p-4 font-mono text-xs text-white/50 h-32 overflow-y-auto">
+              <p>[INFO] Starting installation process...</p>
+              {progress > 10 && <p>[INFO] Creating directory structure...</p>}
+              {progress > 25 && <p>[INFO] Extracting {installerData.appName}.dll...</p>}
+              {progress > 40 && <p>[INFO] Installing dependencies...</p>}
+              {progress > 55 && <p>[INFO] Registering COM components...</p>}
+              {progress > 70 && <p>[INFO] Configuring application settings...</p>}
+              {progress > 85 && <p>[INFO] Creating shortcuts...</p>}
+              {progress >= 100 && <p className="text-green-400">[SUCCESS] Installation completed!</p>}
             </div>
           </div>
         )}
@@ -221,97 +309,98 @@ export const GenericInstaller = ({ appName = "Application", appId, installerId, 
         {stage === "complete" && (
           <div className="max-w-xl mx-auto space-y-6 animate-fade-in">
             <div className="text-center space-y-4">
-              <div className="w-20 h-20 mx-auto bg-green-500/20 rounded-full flex items-center justify-center border-2 border-green-500 animate-scale-in">
-                <Check className="w-12 h-12 text-green-500" />
+              <div className="w-24 h-24 mx-auto bg-gradient-to-br from-green-500/30 to-emerald-500/30 rounded-2xl flex items-center justify-center border border-green-500/30 animate-scale-in shadow-lg shadow-green-500/20">
+                <Check className="w-12 h-12 text-green-400" />
               </div>
-              <h2 className="text-2xl font-bold">Installation Complete</h2>
-              <p className="text-gray-300">
-                {installerData.appName} has been successfully installed on your computer.
+              <h2 className="text-3xl font-bold text-green-400">Installation Complete!</h2>
+              <p className="text-white/70">
+                <span className="text-white font-semibold">{installerData.appName}</span> has been successfully installed on your system.
               </p>
             </div>
 
-            <div className="bg-[#0078D7]/10 border border-[#0078D7]/30 rounded-lg p-4 space-y-2">
-              <div className="flex items-center gap-2 text-sm">
-                <Check className="w-4 h-4 text-green-500" />
-                <span>Program files installed to <span className="font-mono text-xs">{installLocation}</span></span>
+            <div className="bg-white/5 border border-white/10 rounded-xl p-5 space-y-3">
+              <h3 className="font-semibold">Installation Summary</h3>
+              <div className="space-y-2 text-sm">
+                <div className="flex items-center gap-2 text-green-400">
+                  <Check className="w-4 h-4" />
+                  <span>Program files installed to <span className="font-mono text-xs">{installLocation}</span></span>
+                </div>
+                {options.desktopShortcut && (
+                  <div className="flex items-center gap-2 text-green-400">
+                    <Check className="w-4 h-4" />
+                    <span>Desktop shortcut created</span>
+                  </div>
+                )}
+                {options.startMenu && (
+                  <div className="flex items-center gap-2 text-green-400">
+                    <Check className="w-4 h-4" />
+                    <span>Added to Start Menu</span>
+                  </div>
+                )}
+                {options.quickLaunch && (
+                  <div className="flex items-center gap-2 text-green-400">
+                    <Check className="w-4 h-4" />
+                    <span>Pinned to taskbar</span>
+                  </div>
+                )}
+                {options.fileAssociations && (
+                  <div className="flex items-center gap-2 text-green-400">
+                    <Check className="w-4 h-4" />
+                    <span>File associations registered</span>
+                  </div>
+                )}
               </div>
-              {options.desktopShortcut && (
-                <div className="flex items-center gap-2 text-sm">
-                  <Check className="w-4 h-4 text-green-500" />
-                  <span>Desktop shortcut created</span>
-                </div>
-              )}
-              {options.startMenu && (
-                <div className="flex items-center gap-2 text-sm">
-                  <Check className="w-4 h-4 text-green-500" />
-                  <span>Added to Start Menu</span>
-                </div>
-              )}
-              {options.quickLaunch && (
-                <div className="flex items-center gap-2 text-sm">
-                  <Check className="w-4 h-4 text-green-500" />
-                  <span>Pinned to taskbar</span>
-                </div>
-              )}
-              {options.fileAssociations && (
-                <div className="flex items-center gap-2 text-sm">
-                  <Check className="w-4 h-4 text-green-500" />
-                  <span>File associations registered</span>
-                </div>
-              )}
             </div>
           </div>
         )}
       </div>
 
       {/* Footer */}
-      <div className="bg-[#0078D7]/10 border-t border-[#0078D7]/30 p-4 flex justify-between items-center">
-        <div className="text-xs opacity-50">
-          {stage === "welcome" && "Setup Wizard"}
-          {stage === "configure" && "Configuration"}
-          {stage === "installing" && "Installation in progress..."}
-          {stage === "complete" && "Setup Complete"}
+      <div className="relative bg-white/5 border-t border-white/10 p-4 flex justify-between items-center backdrop-blur-sm">
+        <div className="text-xs text-white/40">
+          Urbanshade Installation System v2.4
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-3">
           {stage === "welcome" && (
             <>
-              <button
-                onClick={() => onComplete?.()}
-                className="px-4 py-2 rounded-lg hover:bg-white/10 transition-colors"
-              >
+              <button onClick={onComplete} className="px-5 py-2.5 rounded-lg hover:bg-white/10 transition-all text-white/70 hover:text-white">
                 Cancel
               </button>
-              <button
-                onClick={() => setStage("configure")}
-                className="px-4 py-2 bg-[#0078D7] hover:bg-[#0063B1] rounded-lg transition-colors"
+              <button onClick={() => setStage("license")} className="px-5 py-2.5 bg-primary hover:bg-primary/80 rounded-lg transition-all font-medium">
+                Next →
+              </button>
+            </>
+          )}
+
+          {stage === "license" && (
+            <>
+              <button onClick={() => setStage("welcome")} className="px-5 py-2.5 rounded-lg hover:bg-white/10 transition-all text-white/70 hover:text-white">
+                ← Back
+              </button>
+              <button 
+                onClick={() => setStage("configure")} 
+                disabled={!acceptLicense}
+                className={`px-5 py-2.5 rounded-lg transition-all font-medium ${acceptLicense ? "bg-primary hover:bg-primary/80" : "bg-white/10 text-white/30 cursor-not-allowed"}`}
               >
-                Next
+                Next →
               </button>
             </>
           )}
 
           {stage === "configure" && (
             <>
-              <button
-                onClick={() => setStage("welcome")}
-                className="px-4 py-2 rounded-lg hover:bg-white/10 transition-colors"
-              >
-                Back
+              <button onClick={() => setStage("license")} className="px-5 py-2.5 rounded-lg hover:bg-white/10 transition-all text-white/70 hover:text-white">
+                ← Back
               </button>
-              <button
-                onClick={handleInstall}
-                className="px-4 py-2 bg-[#0078D7] hover:bg-[#0063B1] rounded-lg transition-colors"
-              >
+              <button onClick={handleInstall} className="px-5 py-2.5 bg-primary hover:bg-primary/80 rounded-lg transition-all font-medium flex items-center gap-2">
+                <Download className="w-4 h-4" />
                 Install
               </button>
             </>
           )}
 
           {stage === "complete" && (
-            <button
-              onClick={handleFinish}
-              className="px-4 py-2 bg-green-500 hover:bg-green-600 rounded-lg transition-colors"
-            >
+            <button onClick={handleFinish} className="px-6 py-2.5 bg-green-500 hover:bg-green-600 rounded-lg transition-all font-medium">
               Finish
             </button>
           )}

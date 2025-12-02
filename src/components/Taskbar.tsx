@@ -1,5 +1,8 @@
 import { useState, useEffect } from "react";
+import { Bell, Volume2, VolumeX } from "lucide-react";
 import { App } from "./Desktop";
+import { NotificationCenter } from "./NotificationCenter";
+import { useNotifications } from "@/hooks/useNotifications";
 
 interface WindowData {
   id: string;
@@ -18,11 +21,20 @@ interface TaskbarProps {
 
 export const Taskbar = ({ onStartClick, pinnedApps, onPinnedClick, windows = [], onRestoreWindow }: TaskbarProps) => {
   const [time, setTime] = useState(new Date());
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const { unreadCount } = useNotifications();
+  const [soundEnabled, setSoundEnabled] = useState(() => localStorage.getItem('settings_sound_enabled') !== 'false');
 
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
+
+  const toggleSound = () => {
+    const newValue = !soundEnabled;
+    setSoundEnabled(newValue);
+    localStorage.setItem('settings_sound_enabled', String(newValue));
+  };
 
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
@@ -88,10 +100,36 @@ export const Taskbar = ({ onStartClick, pinnedApps, onPinnedClick, windows = [],
       </div>
 
       <div className="flex items-center gap-3">
+        {/* Sound Toggle */}
+        <button
+          onClick={toggleSound}
+          className="w-9 h-9 rounded-lg flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-white/5 transition-all"
+          title={soundEnabled ? "Mute sounds" : "Enable sounds"}
+        >
+          {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+        </button>
+
+        {/* Notifications */}
+        <button
+          onClick={() => setNotificationsOpen(!notificationsOpen)}
+          className="w-9 h-9 rounded-lg flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-white/5 transition-all relative"
+          title="Notifications"
+        >
+          <Bell className="w-4 h-4" />
+          {unreadCount > 0 && (
+            <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center animate-pulse">
+              {unreadCount > 9 ? '9+' : unreadCount}
+            </span>
+          )}
+        </button>
+
         <div className="text-sm font-mono text-muted-foreground">
           {formatTime(time)}
         </div>
       </div>
+
+      {/* Notification Center */}
+      <NotificationCenter open={notificationsOpen} onClose={() => setNotificationsOpen(false)} />
     </div>
   );
 };
