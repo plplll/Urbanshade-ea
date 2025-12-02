@@ -342,10 +342,10 @@ const DiskLoadScreen = ({ progress, loaded, logs }: { progress: number; loaded: 
       <div className="text-slate-600 mb-3">════════════════════════════════════════════</div>
       
       <div className="space-y-1 overflow-y-auto max-h-64">
-        {logs.map((log, i) => (
+        {logs.filter(Boolean).map((log, i) => (
           <div key={i} className="flex items-start gap-2">
             <span className="text-cyan-600">&gt;</span>
-            <span className={`${log.includes("OK") || log.includes("loaded") || log.includes("ready") || log.includes("CALIBRATED") || log.includes("ACTIVE") 
+            <span className={`${log?.includes("OK") || log?.includes("loaded") || log?.includes("ready") || log?.includes("CALIBRATED") || log?.includes("ACTIVE") 
               ? "text-green-400" 
               : "text-cyan-300"}`}>
               {log}
