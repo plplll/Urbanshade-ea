@@ -73,11 +73,6 @@ export const Desktop = ({
     window.addEventListener('open-installer', handleOpenInstaller);
     return () => window.removeEventListener('open-installer', handleOpenInstaller);
   }, [nextZIndex]);
-  const [draggedIcon, setDraggedIcon] = useState<string | null>(null);
-  const [iconPositions, setIconPositions] = useState<Record<string, { x: number; y: number }>>(() => {
-    const saved = localStorage.getItem('icon_positions');
-    return saved ? JSON.parse(saved) : {};
-  });
   const [installedApps, setInstalledApps] = useState<string[]>(() => {
     const installed = localStorage.getItem('urbanshade_installed_apps');
     return installed ? JSON.parse(installed) : [];
@@ -643,25 +638,6 @@ export const Desktop = ({
 
   const desktopApps = apps;
 
-  const handleIconDragStart = (appId: string) => {
-    setDraggedIcon(appId);
-  };
-
-  const handleIconDragEnd = (appId: string, x: number, y: number) => {
-    const gridSize = 120;
-    const snappedX = Math.round(x / gridSize) * gridSize;
-    const snappedY = Math.round(y / gridSize) * gridSize;
-    
-    const newPositions = {
-      ...iconPositions,
-      [appId]: { x: snappedX, y: snappedY }
-    };
-    
-    setIconPositions(newPositions);
-    localStorage.setItem('icon_positions', JSON.stringify(newPositions));
-    setDraggedIcon(null);
-  };
-
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
     setContextMenu({ x: e.clientX, y: e.clientY });
@@ -679,32 +655,14 @@ export const Desktop = ({
     >
       {/* Desktop Icons */}
       <div className="relative z-10 p-7">
-        <div className="relative" style={{ minHeight: '100vh' }}>
-          {desktopApps.map((app, index) => {
-            const position = iconPositions[app.id];
-            const gridSize = 120;
-            const defaultX = (index % 10) * gridSize + 20;
-            const defaultY = Math.floor(index / 10) * gridSize + 20;
-            
-            return (
-              <div
-                key={app.id}
-                style={{
-                  position: 'absolute',
-                  left: position?.x ?? defaultX,
-                  top: position?.y ?? defaultY,
-                  width: gridSize,
-                }}
-              >
-                <DesktopIcon 
-                  app={app} 
-                  onOpen={openWindow}
-                  onDragStart={handleIconDragStart}
-                  onDragEnd={handleIconDragEnd}
-                />
-              </div>
-            );
-          })}
+        <div className="grid grid-cols-10 gap-4">
+          {desktopApps.map((app) => (
+            <DesktopIcon 
+              key={app.id}
+              app={app} 
+              onOpen={openWindow}
+            />
+          ))}
         </div>
       </div>
 

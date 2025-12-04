@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from "react";
-import { Bug, AlertTriangle, Info, CheckCircle, Trash2, Download, Copy, Upload, Database, RefreshCw, HardDrive, FileText, X, Eye, EyeOff, Play, Settings, Terminal, Zap } from "lucide-react";
+import { Bug, AlertTriangle, Info, CheckCircle, Trash2, Download, Copy, Upload, Database, RefreshCw, HardDrive, FileText, X, Eye, EyeOff, Play, Terminal, Zap, Shield, Activity, ExternalLink, BookOpen } from "lucide-react";
 import { toast } from "sonner";
 import { loadState } from "@/lib/persistence";
+import { Link } from "react-router-dom";
 
 interface LogEntry {
   id: number;
@@ -13,11 +14,26 @@ interface LogEntry {
   stack?: string;
 }
 
+interface ActionEntry {
+  id: number;
+  type: "SYSTEM" | "APP" | "FILE" | "USER" | "SECURITY" | "WINDOW";
+  timestamp: Date;
+  message: string;
+}
+
 interface RecoveryImage {
   name: string;
   data: Record<string, string>;
   created: string;
   size: number;
+}
+
+interface BugcheckEntry {
+  code: string;
+  description: string;
+  timestamp: string;
+  location?: string;
+  systemInfo?: Record<string, string>;
 }
 
 const simplifyError = (message: string): string => {
@@ -46,15 +62,19 @@ const DevMode = () => {
   const [devModeEnabled, setDevModeEnabled] = useState(false);
   const [showWarning, setShowWarning] = useState(true);
   const [logs, setLogs] = useState<LogEntry[]>([]);
+  const [actions, setActions] = useState<ActionEntry[]>([]);
   const [filter, setFilter] = useState<"all" | "error" | "warn" | "info" | "system">("all");
+  const [actionFilter, setActionFilter] = useState<"ALL" | "SYSTEM" | "APP" | "FILE" | "USER" | "SECURITY" | "WINDOW">("ALL");
   const [showTechnical, setShowTechnical] = useState(true);
-  const [selectedTab, setSelectedTab] = useState<"console" | "storage" | "images">("console");
+  const [selectedTab, setSelectedTab] = useState<"console" | "actions" | "storage" | "images" | "bugchecks">("console");
   const [recoveryImages, setRecoveryImages] = useState<RecoveryImage[]>([]);
+  const [bugchecks, setBugchecks] = useState<BugcheckEntry[]>([]);
   const [selectedImage, setSelectedImage] = useState<RecoveryImage | null>(null);
   const [editingKey, setEditingKey] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
   const [storageSearch, setStorageSearch] = useState("");
   const logIdRef = useRef(0);
+  const actionIdRef = useRef(0);
   const logsEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -66,6 +86,10 @@ const DevMode = () => {
     // Load recovery images
     const saved = localStorage.getItem('urbanshade_recovery_images_data');
     if (saved) setRecoveryImages(JSON.parse(saved));
+
+    // Load bugchecks
+    const bugcheckData = localStorage.getItem('urbanshade_bugchecks');
+    if (bugcheckData) setBugchecks(JSON.parse(bugcheckData));
   }, []);
 
   // Console capture
@@ -97,25 +121,46 @@ const DevMode = () => {
       setLogs(prev => [...prev.slice(-500), newLog]);
     };
 
+    const addAction = (type: ActionEntry["type"], message: string) => {
+      const newAction: ActionEntry = {
+        id: actionIdRef.current++,
+        type,
+        timestamp: new Date(),
+        message
+      };
+      setActions(prev => [...prev.slice(-200), newAction]);
+    };
+
     console.log = (...args) => { originalConsole.log(...args); addLog("info", ...args); };
     console.warn = (...args) => { originalConsole.warn(...args); addLog("warn", ...args); };
     console.error = (...args) => { originalConsole.error(...args); addLog("error", ...args); };
     console.info = (...args) => { originalConsole.info(...args); addLog("info", ...args); };
     console.debug = (...args) => { originalConsole.debug(...args); addLog("debug", ...args); };
 
+    // Listen for custom action events
+    const handleAction = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      const { type, message } = customEvent.detail || {};
+      if (type && message) addAction(type, message);
+    };
+
     const handleError = (event: ErrorEvent) => {
       addLog("error", `CRASH: ${event.message} at ${event.filename}:${event.lineno}`);
+      addAction("SYSTEM", `Fatal error: ${event.message}`);
     };
 
     const handleRejection = (event: PromiseRejectionEvent) => {
       addLog("error", `ASYNC ERROR: ${event.reason}`);
+      addAction("SYSTEM", `Unhandled rejection: ${event.reason}`);
     };
 
     window.addEventListener("error", handleError);
     window.addEventListener("unhandledrejection", handleRejection);
+    window.addEventListener("defdev-action", handleAction);
 
     addLog("system", "DEF-DEV Console initialized - Capturing all system events");
     addLog("system", `LocalStorage: ${localStorage.length} entries, ${(JSON.stringify(localStorage).length / 1024).toFixed(1)} KB`);
+    addAction("SYSTEM", "DEF-DEV Console initialized");
 
     return () => {
       console.log = originalConsole.log;
@@ -125,6 +170,7 @@ const DevMode = () => {
       console.debug = originalConsole.debug;
       window.removeEventListener("error", handleError);
       window.removeEventListener("unhandledrejection", handleRejection);
+      window.removeEventListener("defdev-action", handleAction);
     };
   }, [devModeEnabled, showWarning]);
 
@@ -155,44 +201,63 @@ const DevMode = () => {
     );
   }
 
-  // Warning popup
+  // Warning popup - Enhanced
   if (showWarning) {
     return (
       <div className="fixed inset-0 bg-slate-950 flex items-center justify-center p-4">
-        <div className="max-w-lg bg-slate-900 border border-amber-500/50 rounded-lg overflow-hidden shadow-2xl shadow-amber-500/20">
+        <div className="max-w-2xl bg-slate-900 border border-amber-500/50 rounded-lg overflow-hidden shadow-2xl shadow-amber-500/20">
           <div className="bg-gradient-to-r from-amber-600 to-orange-600 p-4 flex items-center gap-3">
             <AlertTriangle className="w-8 h-8 text-white" />
             <div>
               <h2 className="text-xl font-bold text-white">Developer Environment</h2>
-              <p className="text-amber-100 text-sm">DEF-DEV Debug Console</p>
+              <p className="text-amber-100 text-sm">DEF-DEV Debug Console v2.0</p>
             </div>
           </div>
           
           <div className="p-6 space-y-4">
             <div className="flex items-start gap-3 p-4 bg-cyan-500/10 border border-cyan-500/30 rounded-lg">
-              <Info className="w-5 h-5 text-cyan-400 mt-0.5" />
+              <Info className="w-5 h-5 text-cyan-400 mt-0.5 flex-shrink-0" />
               <div className="text-sm text-gray-300">
-                <p className="font-semibold text-cyan-400 mb-2">What is this?</p>
-                <p>This is an <strong>open, free-to-use debugging and logging tool</strong> for UrbanShade OS. It provides full access to system logs, errors, localStorage, and recovery images.</p>
+                <p className="font-semibold text-cyan-400 mb-2">What is DEF-DEV?</p>
+                <p>DEF-DEV is an <strong>open, free-to-use debugging and development console</strong> for UrbanShade OS. It provides comprehensive access to:</p>
+                <ul className="mt-2 ml-4 list-disc space-y-1 text-gray-400">
+                  <li>Real-time console logs, warnings, and errors</li>
+                  <li>System action monitoring (apps, files, security events)</li>
+                  <li>LocalStorage inspection and management</li>
+                  <li>Recovery image creation, editing, and restoration</li>
+                  <li>Bugcheck reports and crash diagnostics</li>
+                </ul>
               </div>
             </div>
             
             <div className="flex items-start gap-3 p-4 bg-amber-500/10 border border-amber-500/30 rounded-lg">
-              <AlertTriangle className="w-5 h-5 text-amber-400 mt-0.5" />
+              <AlertTriangle className="w-5 h-5 text-amber-400 mt-0.5 flex-shrink-0" />
               <div className="text-sm text-gray-300">
-                <p className="font-semibold text-amber-400 mb-2">Heads up!</p>
-                <p>If you're a casual user just exploring the system, you probably don't need to be here. These tools are intended for developers and advanced troubleshooting.</p>
-                <p className="mt-2 text-amber-300/80 italic">Modifying values incorrectly could cause system instability.</p>
+                <p className="font-semibold text-amber-400 mb-2">A Friendly Heads-Up</p>
+                <p>If you're a casual user just exploring the system, these tools are probably not what you're looking for. They're intended for developers, troubleshooters, and anyone who knows what they're doing.</p>
+                <p className="mt-2 text-amber-300/80 font-medium">Modifying values incorrectly could cause system instability, data loss, or unexpected behavior. Proceed with caution.</p>
               </div>
             </div>
 
             <div className="flex items-start gap-3 p-4 bg-purple-500/10 border border-purple-500/30 rounded-lg">
-              <Database className="w-5 h-5 text-purple-400 mt-0.5" />
+              <Database className="w-5 h-5 text-purple-400 mt-0.5 flex-shrink-0" />
               <div className="text-sm text-gray-300">
-                <p className="font-semibold text-purple-400 mb-2">Note</p>
-                <p>In Developer Mode, localStorage persistence may be bypassed for testing purposes.</p>
+                <p className="font-semibold text-purple-400 mb-2">Developer Mode Notice</p>
+                <p>While Developer Mode is active, some persistence features may be bypassed for testing purposes. Your changes may not persist across sessions as expected.</p>
               </div>
             </div>
+
+            <Link 
+              to="/docs/def-dev" 
+              className="flex items-center gap-2 p-4 bg-green-500/10 border border-green-500/30 rounded-lg text-green-400 hover:bg-green-500/20 transition-colors"
+            >
+              <BookOpen className="w-5 h-5" />
+              <div className="flex-1">
+                <p className="font-semibold">Read the Documentation</p>
+                <p className="text-sm text-green-400/70">Learn how to use DEF-DEV effectively</p>
+              </div>
+              <ExternalLink className="w-4 h-4" />
+            </Link>
           </div>
           
           <div className="p-4 bg-slate-800 flex gap-3">
@@ -224,7 +289,20 @@ const DevMode = () => {
     }
   };
 
+  const getActionTypeColor = (type: ActionEntry["type"]) => {
+    switch (type) {
+      case "SYSTEM": return "bg-purple-500/20 text-purple-400 border-purple-500/30";
+      case "APP": return "bg-blue-500/20 text-blue-400 border-blue-500/30";
+      case "FILE": return "bg-cyan-500/20 text-cyan-400 border-cyan-500/30";
+      case "USER": return "bg-yellow-500/20 text-yellow-400 border-yellow-500/30";
+      case "SECURITY": return "bg-red-500/20 text-red-400 border-red-500/30";
+      case "WINDOW": return "bg-green-500/20 text-green-400 border-green-500/30";
+      default: return "bg-gray-500/20 text-gray-400 border-gray-500/30";
+    }
+  };
+
   const filteredLogs = logs.filter(log => filter === "all" || log.type === filter);
+  const filteredActions = actionFilter === "ALL" ? actions : actions.filter(a => a.type === actionFilter);
 
   const exportLogs = () => {
     const content = logs.map(log => 
@@ -315,6 +393,23 @@ const DevMode = () => {
     toast.success("Current state captured");
   };
 
+  const clearBugchecks = () => {
+    setBugchecks([]);
+    localStorage.removeItem('urbanshade_bugchecks');
+    toast.success("Bugcheck reports cleared");
+  };
+
+  const exportBugchecks = () => {
+    const blob = new Blob([JSON.stringify(bugchecks, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `bugchecks_${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success("Bugchecks exported");
+  };
+
   const storageEntries = Object.entries(localStorage).filter(([key]) => 
     !key.includes('recovery_images') && key.toLowerCase().includes(storageSearch.toLowerCase())
   );
@@ -331,6 +426,9 @@ const DevMode = () => {
           </div>
         </div>
         <div className="flex items-center gap-3">
+          <Link to="/docs/def-dev" className="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 rounded text-sm flex items-center gap-1">
+            <BookOpen className="w-3 h-3" /> Docs
+          </Link>
           <span className="text-xs text-gray-500">Session: {new Date().toLocaleTimeString()}</span>
           <button onClick={() => window.location.href = "/"} className="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 rounded text-sm">
             Exit
@@ -342,8 +440,10 @@ const DevMode = () => {
       <div className="flex border-b border-gray-800">
         {[
           { id: "console", label: "Console", icon: <Terminal className="w-4 h-4" /> },
+          { id: "actions", label: "Actions", icon: <Activity className="w-4 h-4" /> },
           { id: "storage", label: "Storage", icon: <Database className="w-4 h-4" /> },
           { id: "images", label: "Recovery Images", icon: <HardDrive className="w-4 h-4" /> },
+          { id: "bugchecks", label: `Bugchecks${bugchecks.length > 0 ? ` (${bugchecks.length})` : ''}`, icon: <Shield className="w-4 h-4" /> },
         ].map(tab => (
           <button
             key={tab.id}
@@ -430,6 +530,52 @@ const DevMode = () => {
               <span>Total: {logs.length}</span>
               <span className="text-red-400">Errors: {logs.filter(l => l.type === "error").length}</span>
               <span className="text-amber-400">Warnings: {logs.filter(l => l.type === "warn").length}</span>
+            </div>
+          </div>
+        )}
+
+        {selectedTab === "actions" && (
+          <div className="h-full flex flex-col">
+            {/* Filter */}
+            <div className="p-2 border-b border-gray-800 flex items-center gap-2 flex-wrap">
+              <span className="text-xs text-gray-500">Filter:</span>
+              {(["ALL", "SYSTEM", "APP", "FILE", "USER", "SECURITY", "WINDOW"] as const).map(type => (
+                <button
+                  key={type}
+                  onClick={() => setActionFilter(type)}
+                  className={`px-2 py-1 rounded text-xs ${
+                    actionFilter === type ? "bg-amber-500/20 text-amber-400" : "bg-gray-800 text-gray-500 hover:text-gray-300"
+                  }`}
+                >
+                  {type}
+                </button>
+              ))}
+              <div className="flex-1" />
+              <button onClick={() => setActions([])} className="p-1.5 hover:bg-gray-800 rounded text-red-400">
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Actions */}
+            <div className="flex-1 overflow-auto p-2 space-y-1 text-xs">
+              {filteredActions.length === 0 ? (
+                <div className="text-center text-gray-600 py-8">No actions recorded yet...</div>
+              ) : (
+                filteredActions.map(action => (
+                  <div key={action.id} className="p-2 rounded bg-gray-800/50 border border-gray-700/50 flex items-center gap-3">
+                    <span className="text-gray-600 min-w-[65px]">{action.timestamp.toLocaleTimeString()}</span>
+                    <span className={`px-2 py-0.5 rounded text-xs font-bold border ${getActionTypeColor(action.type)}`}>
+                      {action.type}
+                    </span>
+                    <span className="text-gray-300">{action.message}</span>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Stats */}
+            <div className="p-2 border-t border-gray-800 text-xs text-gray-500">
+              Total Actions: {actions.length}
             </div>
           </div>
         )}
@@ -543,6 +689,70 @@ const DevMode = () => {
               ) : (
                 <div className="h-full flex items-center justify-center text-gray-600">
                   Select an image or capture current state
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {selectedTab === "bugchecks" && (
+          <div className="h-full flex flex-col">
+            {/* Toolbar */}
+            <div className="p-2 border-b border-gray-800 flex items-center gap-2">
+              <Shield className="w-4 h-4 text-red-400" />
+              <span className="text-sm text-gray-400">Bugcheck Reports</span>
+              <div className="flex-1" />
+              {bugchecks.length > 0 && (
+                <>
+                  <button onClick={exportBugchecks} className="px-3 py-1.5 bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/30 rounded text-xs text-cyan-400">
+                    <Download className="w-3 h-3 inline mr-1" />Export All
+                  </button>
+                  <button onClick={clearBugchecks} className="px-3 py-1.5 bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 rounded text-xs text-red-400">
+                    <Trash2 className="w-3 h-3 inline mr-1" />Clear All
+                  </button>
+                </>
+              )}
+            </div>
+
+            {/* Bugcheck List */}
+            <div className="flex-1 overflow-auto p-4">
+              {bugchecks.length === 0 ? (
+                <div className="text-center py-12">
+                  <CheckCircle className="w-12 h-12 text-green-500/50 mx-auto mb-4" />
+                  <p className="text-gray-500">No bugcheck reports</p>
+                  <p className="text-xs text-gray-600 mt-1">System is running without critical errors</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {bugchecks.map((bc, idx) => (
+                    <div key={idx} className="p-4 bg-red-500/5 border border-red-500/20 rounded-lg">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-bold text-red-400 font-mono">{bc.code}</span>
+                        <span className="text-xs text-gray-500">{new Date(bc.timestamp).toLocaleString()}</span>
+                      </div>
+                      <p className="text-sm text-gray-300 mb-2">{bc.description}</p>
+                      {bc.location && <p className="text-xs text-gray-500">Location: {bc.location}</p>}
+                      {bc.systemInfo && (
+                        <div className="mt-2 pt-2 border-t border-red-500/10 grid grid-cols-2 gap-2 text-xs">
+                          {Object.entries(bc.systemInfo).map(([k, v]) => (
+                            <div key={k}>
+                              <span className="text-gray-500">{k}: </span>
+                              <span className="text-gray-400">{v}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      <button
+                        onClick={() => {
+                          navigator.clipboard.writeText(JSON.stringify(bc, null, 2));
+                          toast.success("Bugcheck copied");
+                        }}
+                        className="mt-3 px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-xs"
+                      >
+                        <Copy className="w-3 h-3 inline mr-1" />Copy Report
+                      </button>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>

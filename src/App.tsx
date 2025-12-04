@@ -13,6 +13,7 @@ import AdminPanelDocs from "./pages/docs/AdminPanel";
 import Advanced from "./pages/docs/Advanced";
 import Shortcuts from "./pages/docs/Shortcuts";
 import Troubleshooting from "./pages/docs/Troubleshooting";
+import DefDevDocs from "./pages/docs/DefDev";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -39,6 +40,7 @@ const App = () => (
         <Route path="/docs/advanced" element={<Advanced />} />
         <Route path="/docs/shortcuts" element={<Shortcuts />} />
         <Route path="/docs/troubleshooting" element={<Troubleshooting />} />
+        <Route path="/docs/def-dev" element={<DefDevDocs />} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>
