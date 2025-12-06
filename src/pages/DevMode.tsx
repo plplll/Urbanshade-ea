@@ -70,8 +70,10 @@ interface CrashEntry {
 const DevMode = () => {
   const [devModeEnabled, setDevModeEnabled] = useState(false);
   const [showWarning, setShowWarning] = useState(true);
+  const [warningAccepted, setWarningAccepted] = useState(false);
   const [crashEntry, setCrashEntry] = useState<CrashEntry | null>(null);
   const [showCrashWarning, setShowCrashWarning] = useState(false);
+  const [firstBootSetup, setFirstBootSetup] = useState(false);
   const [actionConsentChecked, setActionConsentChecked] = useState(false);
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [actions, setActions] = useState<ActionEntry[]>([]);
@@ -139,6 +141,19 @@ const DevMode = () => {
     
     const devEnabled = loadState("settings_developer_mode", false) || loadState("urbanshade_dev_mode_install", false);
     setDevModeEnabled(devEnabled);
+    
+    // Check if warning was already accepted this session (persisted while dev mode enabled)
+    const hasAcceptedWarning = localStorage.getItem('def_dev_warning_accepted') === 'true';
+    if (hasAcceptedWarning && devEnabled) {
+      setWarningAccepted(true);
+      setShowWarning(false);
+    }
+    
+    // Check if this is first time entering DEF-DEV
+    const hasCompletedSetup = localStorage.getItem('def_dev_setup_complete') === 'true';
+    if (!hasCompletedSetup && devEnabled) {
+      setFirstBootSetup(true);
+    }
     
     // Check if action persistence consent exists
     const hasConsent = localStorage.getItem('def_dev_actions_consent') === 'true';
@@ -288,7 +303,7 @@ const DevMode = () => {
                 <span className="font-mono text-sm text-emerald-300">def-dev@urbanshade:~ [INIT]</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-xs text-emerald-400/60 font-mono">v2.2</span>
+                <span className="text-xs text-emerald-400/60 font-mono">v2.4</span>
                 <Bug className="w-5 h-5 text-emerald-400" />
               </div>
             </div>
@@ -313,7 +328,7 @@ const DevMode = () => {
 ║  ██████╔╝███████╗██║         ██████╔╝███████╗ ╚████╔╝              ║
 ║  ╚═════╝ ╚══════╝╚═╝         ╚═════╝ ╚══════╝  ╚═══╝               ║
 ║                                                                     ║
-║  Developer Environment Framework - Development Console    v2.2      ║
+║  Developer Environment Framework - Development Console    v2.4      ║
 ║  UrbanShade OS Advanced Debugging & System Management Tool          ║
 ╚════════════════════════════════════════════════════════════════════╝`}
               </pre>
@@ -454,11 +469,18 @@ const DevMode = () => {
                       localStorage.setItem('def_dev_actions_consent', 'true');
                       toast.success("Persistent action logging enabled - def-dev-actions created");
                     }
+                    // Persist warning acceptance while dev mode is enabled
+                    localStorage.setItem('def_dev_warning_accepted', 'true');
+                    if (firstBootSetup) {
+                      localStorage.setItem('def_dev_setup_complete', 'true');
+                      toast.success("DEF-DEV first-time setup complete!");
+                    }
+                    setWarningAccepted(true);
                     setShowWarning(false);
                   }}
                   className="flex-1 px-4 py-3 bg-gradient-to-r from-emerald-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 rounded-lg text-white font-mono text-sm font-bold transition-all shadow-lg shadow-emerald-500/20"
                 >
-                  <Play className="w-4 h-4 inline mr-2" />./init --confirm
+                  <Play className="w-4 h-4 inline mr-2" />{firstBootSetup ? './setup --init' : './init --confirm'}
                 </button>
               </div>
             </div>

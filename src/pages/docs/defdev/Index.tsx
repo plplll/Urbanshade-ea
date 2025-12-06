@@ -6,58 +6,65 @@ const DefDevIndex = () => {
     {
       icon: Zap,
       title: "Setup & Access",
-      description: "Enable Developer Mode and access the DEF-DEV console. Multiple methods available.",
+      description: "Enable Developer Mode and access the DEF-DEV console. Multiple methods available including first-boot setup.",
       link: "/docs/def-dev/setup",
       color: "green"
     },
     {
       icon: Terminal,
       title: "Console Tab",
-      description: "Real-time logging with smart error simplification, filtering, and export.",
+      description: "Real-time logging with smart error simplification, filtering, and export capabilities.",
       link: "/docs/def-dev/console",
       color: "cyan"
     },
     {
       icon: Activity,
       title: "Actions Tab",
-      description: "Monitor system events and user interactions. Persistence support.",
+      description: "Monitor system events and user interactions with persistence support.",
       link: "/docs/def-dev/actions",
       color: "purple"
     },
     {
       icon: Database,
       title: "Storage Tab",
-      description: "View and manage localStorage entries used by UrbanShade OS.",
+      description: "View and manage localStorage entries used by UrbanShade OS including dev-specific storage.",
       link: "/docs/def-dev/storage",
       color: "blue"
     },
     {
       icon: Code,
       title: "DEF-DEV Terminal",
-      description: "Command-line interface for executing admin commands and managing the system.",
+      description: "Command-line interface for executing admin commands and managing the system remotely.",
       link: "/docs/def-dev/terminal",
       color: "green"
     },
     {
       icon: Shield,
       title: "Admin Panel",
-      description: "Advanced controls for crash testing, system states, and image management.",
+      description: "Advanced controls for crash testing, system states, SystemBus integration, and image management.",
       link: "/docs/def-dev/admin",
       color: "red"
     },
     {
       icon: Bug,
       title: "Testing Bugchecks",
-      description: "Trigger and analyze bugcheck screens for testing and debugging.",
+      description: "Trigger and analyze bugcheck screens for testing and debugging. Crash entry mode support.",
       link: "/docs/def-dev/bugchecks",
       color: "red"
     },
     {
       icon: FileWarning,
       title: "API Reference",
-      description: "Action Dispatcher, Command Queue, and System Bus APIs.",
+      description: "Action Dispatcher, Command Queue, and System Bus APIs for advanced integration.",
       link: "/docs/def-dev/api",
       color: "amber"
+    },
+    {
+      icon: Activity,
+      title: "Diagnostics",
+      description: "Real-time system health monitoring, performance metrics, and diagnostic utilities.",
+      link: "/docs/def-dev/diagnostics",
+      color: "green"
     }
   ];
 
@@ -87,10 +94,10 @@ const DefDevIndex = () => {
             <h2 className="text-4xl font-bold text-amber-400">DEF-DEV Console</h2>
           </div>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Developer Environment and Debugging Tool for UrbanShade OS v2.0
+            Developer Environment and Debugging Tool for UrbanShade OS v2.4
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
-            <span className="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-xs font-semibold">v2.0</span>
+            <span className="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-xs font-semibold">v2.4</span>
             <span className="px-3 py-1 bg-cyan-500/20 text-cyan-400 rounded-full text-xs font-semibold">Developer Tool</span>
             <span className="px-3 py-1 bg-amber-500/20 text-amber-400 rounded-full text-xs font-semibold">Advanced</span>
           </div>
@@ -181,10 +188,10 @@ const DefDevIndex = () => {
           </ol>
         </section>
 
-        {/* Footer */}
+      {/* Footer */}
         <footer className="text-center pt-8 border-t border-white/10">
           <p className="text-sm text-muted-foreground">
-            DEF-DEV Documentation • v2.0 • Part of UrbanShade OS
+            DEF-DEV Documentation • v2.4 • Part of UrbanShade OS
           </p>
           <Link to="/docs" className="inline-block text-amber-400 hover:underline text-sm font-semibold mt-4">
             ← Return to Main Documentation

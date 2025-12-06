@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { AlertTriangle, Terminal as TerminalIcon } from "lucide-react";
+import { AlertTriangle, Terminal as TerminalIcon, Power, RefreshCw, Shield, Bug } from "lucide-react";
 import { Button } from "./ui/button";
 import { toast } from "sonner";
+import { systemBus } from "@/lib/systemBus";
 
 interface AdminPanelProps {
   onExit: () => void;
@@ -387,6 +388,7 @@ export const AdminPanel = ({ onExit, onChaos, onCrash, onCustomCrash }: AdminPan
                   onClick={() => {
                     const current = localStorage.getItem('bios_security_enabled') !== 'false';
                     localStorage.setItem('bios_security_enabled', String(!current));
+                    systemBus.emit("CUSTOM_COMMAND", { command: "security_toggle", enabled: !current });
                     toast.success(!current ? "✓ Security Enabled" : "⚠ Security DISABLED", {
                       description: !current ? "All security features restored" : "System is now vulnerable"
                     });
@@ -401,6 +403,7 @@ export const AdminPanel = ({ onExit, onChaos, onCrash, onCustomCrash }: AdminPan
                   onClick={() => {
                     localStorage.removeItem('urbanshade_admin');
                     localStorage.removeItem('urbanshade_accounts');
+                    systemBus.emit("CUSTOM_COMMAND", { command: "auth_disable" });
                     toast.warning("🔓 Authentication Disabled");
                   }}
                   variant="outline"
@@ -412,6 +415,7 @@ export const AdminPanel = ({ onExit, onChaos, onCrash, onCustomCrash }: AdminPan
                 <Button
                   onClick={() => {
                     localStorage.setItem('bios_password', '');
+                    systemBus.emit("CUSTOM_COMMAND", { command: "bios_password_clear" });
                     toast.success("BIOS password removed");
                   }}
                   variant="outline"
@@ -419,6 +423,59 @@ export const AdminPanel = ({ onExit, onChaos, onCrash, onCustomCrash }: AdminPan
                   size="sm"
                 >
                   □ Clear BIOS Password
+                </Button>
+              </div>
+            </div>
+
+            {/* SystemBus Controls */}
+            <div className="space-y-2">
+              <h3 className="text-xs font-bold text-cyan-500 uppercase tracking-wider border-b border-cyan-500/30 pb-1">
+                SystemBus Controls
+              </h3>
+              <div className="space-y-1.5">
+                <Button
+                  onClick={() => {
+                    systemBus.triggerReboot();
+                    toast.info("Reboot signal sent via SystemBus");
+                  }}
+                  variant="outline"
+                  className="w-full justify-start text-xs h-8 border-cyan-500/50 text-cyan-400"
+                  size="sm"
+                >
+                  <RefreshCw className="w-3 h-3 mr-2" /> Trigger Reboot
+                </Button>
+                <Button
+                  onClick={() => {
+                    systemBus.triggerShutdown();
+                    toast.info("Shutdown signal sent via SystemBus");
+                  }}
+                  variant="outline"
+                  className="w-full justify-start text-xs h-8 border-cyan-500/50 text-cyan-400"
+                  size="sm"
+                >
+                  <Power className="w-3 h-3 mr-2" /> Trigger Shutdown
+                </Button>
+                <Button
+                  onClick={() => {
+                    systemBus.enterRecovery();
+                    toast.info("Recovery mode signal sent via SystemBus");
+                  }}
+                  variant="outline"
+                  className="w-full justify-start text-xs h-8 border-cyan-500/50 text-cyan-400"
+                  size="sm"
+                >
+                  <Shield className="w-3 h-3 mr-2" /> Enter Recovery
+                </Button>
+                <Button
+                  onClick={() => {
+                    systemBus.openDevMode();
+                    toast.info("DEF-DEV signal sent via SystemBus");
+                  }}
+                  variant="outline"
+                  className="w-full justify-start text-xs h-8 border-cyan-500/50 text-cyan-400"
+                  size="sm"
+                >
+                  <Bug className="w-3 h-3 mr-2" /> Open DEF-DEV
                 </Button>
               </div>
             </div>

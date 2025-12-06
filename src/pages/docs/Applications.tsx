@@ -56,6 +56,18 @@ const Applications = () => {
       name: "Clock",
       description: "Time is an illusion. Lunchtime doubly so.",
       details: "Keep track of time, even though day and night don't exist 8km underwater. Features multiple time zones for coordinating with surface operations."
+    },
+    {
+      icon: Folder,
+      name: "Task Manager",
+      description: "See what's running (and kill it if you must)",
+      details: "Monitor running applications, view system resource usage, and terminate unresponsive programs. Like Ctrl+Alt+Delete, but prettier."
+    },
+    {
+      icon: Settings,
+      name: "Registry Editor",
+      description: "Touch the forbidden settings",
+      details: "Direct access to system configuration values. Modify at your own risk - there's no 'Are you sure?' dialog here."
     }
   ];
 
@@ -110,6 +122,14 @@ const Applications = () => {
             You can open multiple applications at once! Each one opens in its own window 
             that you can drag, resize, minimize, and maximize. It's like a real desktop, 
             except everything is simulated and the files aren't real. Living the dream!
+          </p>
+        </div>
+
+        <div className="p-6 rounded-lg bg-yellow-500/10 border border-yellow-500/30">
+          <h3 className="font-bold text-yellow-500 mb-2">🔧 Developer Note</h3>
+          <p className="text-sm text-muted-foreground">
+            If you have Developer Mode enabled, you can also access DEF-DEV for advanced 
+            debugging and system analysis. Check out the DEF-DEV documentation for more info!
           </p>
         </div>
 

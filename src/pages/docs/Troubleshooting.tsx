@@ -50,6 +50,16 @@ const Troubleshooting = () => {
       issue: "Camera feeds show static",
       status: "feature",
       workaround: "That's... that's the point. It's an abandoned underwater facility. What did you expect, Netflix?"
+    },
+    {
+      issue: "DEF-DEV console not capturing logs",
+      status: "known",
+      workaround: "Make sure you've accepted the warning screen and dev mode is enabled in Settings."
+    },
+    {
+      issue: "Action Logger showing bugcheck errors",
+      status: "fixed",
+      workaround: "This was fixed in v2.4 - update to the latest version."
     }
   ];
 
@@ -170,6 +180,44 @@ const Troubleshooting = () => {
             </div>
             <p className="text-xs text-destructive">
               ⚠️ All of these will delete your saved data. Export first if you want to keep anything!
+            </p>
+          </div>
+        </section>
+
+        <section className="space-y-6">
+          <h3 className="text-2xl font-bold">DEF-DEV Debugging</h3>
+          <div className="p-6 rounded-lg bg-amber-500/10 border border-amber-500/30 space-y-4">
+            <p className="text-muted-foreground">
+              If you have Developer Mode enabled, DEF-DEV provides powerful debugging tools:
+            </p>
+            <div className="space-y-3">
+              <div className="p-3 rounded bg-black/40">
+                <p className="font-bold text-sm text-amber-400">Console Tab</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  View real-time logs with error simplification - great for understanding what went wrong
+                </p>
+              </div>
+              <div className="p-3 rounded bg-black/40">
+                <p className="font-bold text-sm text-amber-400">Actions Tab</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Monitor all system events and user interactions
+                </p>
+              </div>
+              <div className="p-3 rounded bg-black/40">
+                <p className="font-bold text-sm text-amber-400">Storage Tab</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Inspect and edit localStorage entries directly
+                </p>
+              </div>
+              <div className="p-3 rounded bg-black/40">
+                <p className="font-bold text-sm text-amber-400">Recovery Images</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Create snapshots of your system state to restore later
+                </p>
+              </div>
+            </div>
+            <p className="text-xs text-amber-400">
+              Enable Developer Mode in Settings → Developer Options to access DEF-DEV
             </p>
           </div>
         </section>

@@ -5,8 +5,8 @@ import { Sparkles, Check } from "lucide-react";
 
 export const ChangelogDialog = () => {
   const [open, setOpen] = useState(false);
-  const [selectedVersion, setSelectedVersion] = useState("2.3");
-  const currentVersion = "2.3";
+  const [selectedVersion, setSelectedVersion] = useState("2.4");
+  const currentVersion = "2.4";
 
   useEffect(() => {
     const lastSeenVersion = localStorage.getItem("urbanshade_last_seen_version");
@@ -21,6 +21,34 @@ export const ChangelogDialog = () => {
   };
 
   const changelogs: Record<string, Record<string, string[]>> = {
+    "2.4": {
+      "DEF-DEV Enhancements": [
+        "Redesigned warning screen with terminal aesthetic and detailed info",
+        "Added first-boot DEF-DEV setup with consent flow",
+        "Persistent warning acceptance while dev mode is enabled",
+        "Alternative dev storage for development mode data",
+        "Enhanced crash entry mode with automatic bugcheck tab navigation",
+        "New Diagnostics tab for system health monitoring"
+      ],
+      "System Improvements": [
+        "AdminPanel now uses SystemBus API more extensively",
+        "Added UUR and Diagnostics routes to documentation",
+        "Fixed action logger spamming errors on open",
+        "Improved crash screen with clear 'not a simulation' message"
+      ],
+      "Documentation Updates": [
+        "Expanded all documentation sections",
+        "Added UUR (UrbanShade User Repository) documentation",
+        "New Diagnostics documentation page",
+        "Updated DEF-DEV Index with new sections",
+        "Enhanced Getting Started and Applications guides"
+      ],
+      "Bug Fixes": [
+        "Fixed dev mode toggle opening DEF-DEV in new window before refresh",
+        "Fixed logging not working properly in DEF-DEV",
+        "Corrected HTML title to show v2.4"
+      ]
+    },
     "2.3": {
       "DEF-DEV Overhaul": [
         "Complete DEF-DEV documentation with 8 dedicated sub-pages",
