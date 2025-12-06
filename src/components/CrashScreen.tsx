@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { AlertTriangle, Bug, RefreshCw, ExternalLink } from "lucide-react";
+import { AlertTriangle, Bug, RefreshCw, Terminal, Cpu, HardDrive, Activity } from "lucide-react";
 
 export type CrashType = 
   | "KERNEL_PANIC" 
@@ -31,7 +31,6 @@ export interface CrashData {
 interface CrashScreenProps {
   onReboot: () => void;
   crashData?: CrashData;
-  // Legacy props for backwards compatibility
   killedProcess?: string;
   crashType?: "kernel" | "virus" | "bluescreen" | "memory" | "corruption" | "overload";
   customData?: { title: string; message: string } | null;
@@ -39,67 +38,67 @@ interface CrashScreenProps {
 
 const STOP_CODES: Record<CrashType, { description: string; whatFailed?: string }> = {
   KERNEL_PANIC: {
-    description: "Your device ran into a problem and needs to restart.",
-    whatFailed: "ntoskrnl.exe"
+    description: "The system kernel encountered a fatal error and cannot continue.",
+    whatFailed: "urbanshade.core"
   },
   CRITICAL_PROCESS_DIED: {
     description: "A critical system process has terminated unexpectedly.",
-    whatFailed: "csrss.exe"
+    whatFailed: "system.service"
   },
   SYSTEM_SERVICE_EXCEPTION: {
-    description: "An exception occurred in a system service.",
-    whatFailed: "win32kfull.sys"
+    description: "An exception occurred in a system service routine.",
+    whatFailed: "svc.handler"
   },
   MEMORY_MANAGEMENT: {
-    description: "A memory management error has occurred.",
-    whatFailed: "ntoskrnl.exe"
+    description: "A memory allocation or management error has occurred.",
+    whatFailed: "mem.allocator"
   },
   IRQL_NOT_LESS_OR_EQUAL: {
-    description: "A kernel-mode process attempted to access memory at an invalid address.",
-    whatFailed: "ntoskrnl.exe"
+    description: "A process attempted to access memory at an invalid address.",
+    whatFailed: "ptr.deref"
   },
   PAGE_FAULT_IN_NONPAGED_AREA: {
-    description: "Invalid system memory was referenced.",
-    whatFailed: "ntfs.sys"
+    description: "Invalid system memory was referenced during execution.",
+    whatFailed: "page.handler"
   },
   DRIVER_IRQL_NOT_LESS_OR_EQUAL: {
-    description: "A driver accessed paged memory at an invalid IRQL.",
-    whatFailed: "nvlddmkm.sys"
+    description: "A driver accessed paged memory at an invalid level.",
+    whatFailed: "driver.io"
   },
   SYSTEM_THREAD_EXCEPTION_NOT_HANDLED: {
     description: "A system thread generated an exception that was not handled.",
-    whatFailed: "atikmdag.sys"
+    whatFailed: "thread.exec"
   },
   UNEXPECTED_KERNEL_MODE_TRAP: {
     description: "The system encountered an unexpected kernel mode trap.",
-    whatFailed: "ntoskrnl.exe"
+    whatFailed: "trap.handler"
   },
   KMODE_EXCEPTION_NOT_HANDLED: {
-    description: "A kernel mode exception was not handled.",
-    whatFailed: "ntoskrnl.exe"
+    description: "A kernel mode exception was not properly handled.",
+    whatFailed: "exception.dispatch"
   },
   INACCESSIBLE_BOOT_DEVICE: {
-    description: "The boot device is inaccessible.",
-    whatFailed: "storahci.sys"
+    description: "The boot device is inaccessible or corrupted.",
+    whatFailed: "boot.loader"
   },
   VIDEO_TDR_FAILURE: {
     description: "The display driver failed to respond in time.",
-    whatFailed: "nvlddmkm.sys"
+    whatFailed: "display.driver"
   },
   WHEA_UNCORRECTABLE_ERROR: {
-    description: "A fatal hardware error has occurred.",
-    whatFailed: "hal.dll"
+    description: "A fatal hardware error has occurred in the system.",
+    whatFailed: "hardware.check"
   },
   DPC_WATCHDOG_VIOLATION: {
-    description: "A DPC routine exceeded the system watchdog timeout.",
-    whatFailed: "storahci.sys"
+    description: "A deferred procedure call exceeded the system watchdog timeout.",
+    whatFailed: "dpc.queue"
   },
   CLOCK_WATCHDOG_TIMEOUT: {
     description: "A processor clock interrupt was not received within the allocated interval.",
-    whatFailed: "ntoskrnl.exe"
+    whatFailed: "clock.timer"
   },
   custom: {
-    description: "Your device ran into a problem and needs to restart."
+    description: "The system encountered a critical error and cannot continue."
   }
 };
 
@@ -110,42 +109,65 @@ export const CrashScreen = ({
   crashType = "kernel", 
   customData 
 }: CrashScreenProps) => {
-  const [showScreen, setShowScreen] = useState(false);
+  const [phase, setPhase] = useState<"collecting" | "analyzing" | "ready">("collecting");
   const [progress, setProgress] = useState(0);
-  const [qrVisible, setQrVisible] = useState(false);
+  const [memDump, setMemDump] = useState<string[]>([]);
+  const [glitchIntensity, setGlitchIntensity] = useState(0);
 
   useEffect(() => {
-    const showTimeout = setTimeout(() => {
-      setShowScreen(true);
-    }, 500);
+    // Phase progression
+    const collectTimer = setTimeout(() => setPhase("analyzing"), 2000);
+    const analyzeTimer = setTimeout(() => setPhase("ready"), 4000);
 
-    return () => clearTimeout(showTimeout);
+    return () => {
+      clearTimeout(collectTimer);
+      clearTimeout(analyzeTimer);
+    };
   }, []);
 
   useEffect(() => {
-    if (showScreen) {
+    if (phase !== "ready") {
       const interval = setInterval(() => {
         setProgress(prev => {
-          if (prev >= 100) {
-            clearInterval(interval);
-            return 100;
-          }
-          return prev + Math.random() * 3;
+          const target = phase === "collecting" ? 45 : 100;
+          if (prev >= target) return target;
+          return prev + Math.random() * 5;
         });
-      }, 150);
-
-      const qrTimeout = setTimeout(() => setQrVisible(true), 800);
-
-      return () => {
-        clearInterval(interval);
-        clearTimeout(qrTimeout);
-      };
+      }, 100);
+      return () => clearInterval(interval);
     }
-  }, [showScreen]);
+  }, [phase]);
 
-  if (!showScreen) {
-    return <div className="fixed inset-0 bg-black" />;
-  }
+  // Generate fake memory dump
+  useEffect(() => {
+    const generateHex = () => {
+      const lines: string[] = [];
+      for (let i = 0; i < 8; i++) {
+        const addr = (0x7FFE0000 + i * 16).toString(16).toUpperCase().padStart(8, '0');
+        const bytes = Array.from({ length: 16 }, () => 
+          Math.floor(Math.random() * 256).toString(16).toUpperCase().padStart(2, '0')
+        ).join(' ');
+        lines.push(`${addr}  ${bytes}`);
+      }
+      return lines;
+    };
+
+    const interval = setInterval(() => {
+      setMemDump(generateHex());
+    }, 500);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Glitch effect for virus type
+  useEffect(() => {
+    if (crashType === "virus") {
+      const interval = setInterval(() => {
+        setGlitchIntensity(Math.random());
+      }, 100);
+      return () => clearInterval(interval);
+    }
+  }, [crashType]);
 
   // Convert legacy props to new format
   const resolvedCrashData: CrashData = crashData || {
@@ -161,136 +183,178 @@ export const CrashScreen = ({
   const stopInfo = STOP_CODES[resolvedCrashData.stopCode] || STOP_CODES.KERNEL_PANIC;
   const displayProgress = Math.min(100, Math.floor(progress));
 
+  // Generate error code
+  const errorCode = `US-${resolvedCrashData.stopCode.replace(/_/g, '-')}-${Date.now().toString(16).slice(-6).toUpperCase()}`;
+
   return (
-    <div className="fixed inset-0 bg-[#0078d4] text-white font-sans overflow-hidden">
-      {/* Subtle scan lines effect */}
-      <div className="absolute inset-0 pointer-events-none opacity-[0.02]" 
+    <div 
+      className="fixed inset-0 bg-[#0a0a12] text-white font-mono overflow-hidden flex flex-col"
+      style={crashType === "virus" ? {
+        filter: `hue-rotate(${glitchIntensity * 30}deg)`,
+        transform: `translate(${(glitchIntensity - 0.5) * 4}px, ${(glitchIntensity - 0.5) * 2}px)`
+      } : undefined}
+    >
+      {/* Scan lines */}
+      <div className="absolute inset-0 pointer-events-none opacity-[0.03]" 
         style={{ 
-          backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 1px, rgba(0,0,0,0.3) 1px, rgba(0,0,0,0.3) 2px)' 
+          backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.1) 2px, rgba(255,255,255,0.1) 4px)' 
         }} 
       />
 
-      <div className="flex flex-col items-start justify-center h-full p-8 md:p-16 max-w-4xl mx-auto animate-fade-in">
-        {/* Emoticon */}
-        <div className="text-[100px] md:text-[140px] leading-none mb-4 font-light">:(</div>
-        
-        {/* Main message */}
-        <div className="space-y-6 mb-8 md:mb-12">
-          <p className="text-xl md:text-2xl leading-relaxed">
-            {resolvedCrashData.description || stopInfo.description}
-          </p>
+      {/* Header Bar */}
+      <div className="bg-red-900/90 border-b border-red-600/50 px-6 py-4">
+        <div className="flex items-center justify-between max-w-6xl mx-auto">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-red-600 rounded-lg flex items-center justify-center animate-pulse">
+              <AlertTriangle className="w-7 h-7 text-white" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-white">SYSTEM CRASH</h1>
+              <p className="text-xs text-red-300">UrbanShade OS has encountered a fatal error</p>
+            </div>
+          </div>
+          <div className="text-right">
+            <div className="text-xs text-red-300">Error Reference</div>
+            <div className="text-sm font-mono text-white">{errorCode}</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="flex-1 overflow-auto p-6">
+        <div className="max-w-4xl mx-auto space-y-6">
           
-          {/* CRITICAL: NOT A SIMULATION */}
-          <div className="bg-white/15 border-2 border-white/30 rounded-lg p-5 max-w-2xl">
+          {/* CRITICAL WARNING */}
+          <div className="p-5 bg-gradient-to-r from-red-950/80 to-red-900/60 border-2 border-red-500/50 rounded-xl">
             <div className="flex items-start gap-4">
-              <AlertTriangle className="w-7 h-7 text-yellow-300 flex-shrink-0 mt-0.5 animate-pulse" />
+              <div className="w-10 h-10 bg-red-500/30 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
+                <AlertTriangle className="w-6 h-6 text-red-400 animate-pulse" />
+              </div>
               <div className="space-y-3">
-                <p className="text-base md:text-lg leading-relaxed font-semibold text-yellow-200">
-                  ⚠️ This is NOT a simulation — a real error occurred in the system.
+                <h2 className="text-lg font-bold text-red-400">⚠️ THIS IS NOT A SIMULATION</h2>
+                <p className="text-sm text-red-200/90 leading-relaxed">
+                  A <strong>real error</strong> occurred in the UrbanShade OS application. This crash screen 
+                  indicates an actual unrecoverable error - not a themed or simulated one. The system halted 
+                  to prevent data corruption or further instability.
                 </p>
-                <p className="text-sm md:text-base leading-relaxed opacity-90">
-                  The system encountered an error it could not recover from automatically. This is a genuine crash 
-                  that was triggered by something in the application — it's not fake, not part of gameplay, and not 
-                  intentionally caused unless you triggered it via DEF-DEV admin tools.
-                </p>
-                <div className="space-y-2 pt-3 border-t border-white/20">
-                  <p className="text-xs md:text-sm opacity-80">
-                    <strong className="text-yellow-200">Why did this happen?</strong> Possible causes include: a bug in the code, 
-                    corrupted system state, a component entering an invalid state, memory issues, or an unhandled exception.
-                  </p>
-                  <p className="text-xs md:text-sm opacity-70">
-                    <strong>What you can do:</strong> Click "Restart now" to reboot the system. If this keeps 
-                    happening, try entering Recovery Mode (F2 during boot), clearing localStorage, or report the issue 
-                    via Debug Error so developers can investigate.
-                  </p>
+                <div className="pt-2 border-t border-red-500/30 text-xs text-red-300/80 space-y-1">
+                  <p><strong>Why this happened:</strong> An unhandled exception, invalid state, or critical failure occurred.</p>
+                  <p><strong>What to do:</strong> Click "Restart System" below. If this repeats, try Recovery Mode (F2 during boot) or clear localStorage.</p>
                 </div>
               </div>
             </div>
           </div>
-          
-          <div className="flex items-center gap-3">
-            <div className="h-1 w-32 bg-white/30 rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-white transition-all duration-150" 
-                style={{ width: `${displayProgress}%` }}
-              />
-            </div>
-            <p className="text-lg md:text-xl">
-              {displayProgress}% complete
-            </p>
-          </div>
-        </div>
 
-        {/* QR Code and info */}
-        <div className="flex flex-col md:flex-row items-start gap-6 mb-8 md:mb-12">
-          {/* Fake QR Code */}
-          <div className={`transition-opacity duration-500 ${qrVisible ? 'opacity-100' : 'opacity-0'}`}>
-            <div className="w-20 h-20 md:w-24 md:h-24 bg-white p-2 rounded-sm">
-              <div className="w-full h-full grid grid-cols-5 gap-0.5">
-                {Array.from({ length: 25 }).map((_, i) => (
-                  <div 
-                    key={i} 
-                    className={`${Math.random() > 0.5 ? 'bg-black' : 'bg-white'}`}
-                  />
-                ))}
+          {/* Error Details Grid */}
+          <div className="grid md:grid-cols-2 gap-4">
+            {/* Stop Code */}
+            <div className="p-5 bg-slate-900/80 border border-slate-700 rounded-xl">
+              <div className="flex items-center gap-3 mb-4">
+                <Cpu className="w-5 h-5 text-cyan-400" />
+                <span className="text-xs text-slate-400 uppercase tracking-wider">Stop Code</span>
+              </div>
+              <div className="text-2xl font-bold text-red-400 mb-2">
+                {resolvedCrashData.stopCode.replace(/_/g, ' ')}
+              </div>
+              <div className="text-xs text-slate-500 font-mono">
+                0x{(resolvedCrashData.stopCode.length * 0x1234).toString(16).toUpperCase().padStart(8, '0')}
               </div>
             </div>
-          </div>
 
-          {/* Technical info */}
-          <div className="text-sm leading-relaxed space-y-3 opacity-90">
-            <p>
-              For more information about this issue and possible fixes, visit<br />
-              <span className="underline">https://www.urbanshade.dev/stopcode</span>
-            </p>
-            <p>
-              If you call a support person, give them this info:
-            </p>
-            <div className="font-mono space-y-1 bg-black/20 p-3 rounded">
-              <p>Stop code: {resolvedCrashData.stopCode.replace(/_/g, ' ')}</p>
-              {(stopInfo.whatFailed || resolvedCrashData.module) && (
-                <p>What failed: {resolvedCrashData.module || stopInfo.whatFailed}</p>
-              )}
+            {/* What Failed */}
+            <div className="p-5 bg-slate-900/80 border border-slate-700 rounded-xl">
+              <div className="flex items-center gap-3 mb-4">
+                <HardDrive className="w-5 h-5 text-amber-400" />
+                <span className="text-xs text-slate-400 uppercase tracking-wider">What Failed</span>
+              </div>
+              <div className="text-lg font-bold text-amber-400 mb-2">
+                {resolvedCrashData.module || stopInfo.whatFailed || 'unknown.module'}
+              </div>
               {resolvedCrashData.process && (
-                <p>Process: {resolvedCrashData.process}</p>
+                <div className="text-xs text-slate-500">
+                  Process: <span className="text-slate-400">{resolvedCrashData.process}</span>
+                </div>
               )}
             </div>
           </div>
-        </div>
 
-        {/* Action buttons */}
-        <div className="flex flex-wrap gap-3">
-          <button
-            onClick={onReboot}
-            className="flex items-center gap-2 px-6 md:px-8 py-3 bg-white/20 hover:bg-white/30 text-white font-semibold transition-colors text-base md:text-lg rounded"
-          >
-            <RefreshCw className="w-5 h-5" />
-            Restart now
-          </button>
+          {/* Description */}
+          <div className="p-5 bg-slate-900/60 border border-slate-700/50 rounded-xl">
+            <div className="flex items-center gap-3 mb-3">
+              <Activity className="w-5 h-5 text-purple-400" />
+              <span className="text-xs text-slate-400 uppercase tracking-wider">Error Description</span>
+            </div>
+            <p className="text-slate-300 leading-relaxed">
+              {resolvedCrashData.description || stopInfo.description}
+            </p>
+          </div>
+
+          {/* Memory Dump (Visual Effect) */}
+          <div className="p-4 bg-black/80 border border-slate-800 rounded-xl">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-xs text-slate-500">Memory Dump</span>
+              <span className="text-xs text-slate-600">
+                {phase === "collecting" ? "Collecting..." : phase === "analyzing" ? "Analyzing..." : "Complete"}
+              </span>
+            </div>
+            <div className="font-mono text-[10px] text-slate-600 space-y-0.5 h-24 overflow-hidden">
+              {memDump.map((line, i) => (
+                <div key={i} className={phase === "ready" ? "" : "animate-pulse"}>{line}</div>
+              ))}
+            </div>
+          </div>
+
+          {/* Progress */}
+          {phase !== "ready" && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-slate-400">
+                  {phase === "collecting" ? "Collecting crash data..." : "Analyzing error..."}
+                </span>
+                <span className="text-slate-500">{displayProgress}%</span>
+              </div>
+              <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-gradient-to-r from-red-600 to-red-500 transition-all duration-150"
+                  style={{ width: `${displayProgress}%` }}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Timestamp */}
+          <div className="text-xs text-slate-600 text-center">
+            Crashed at: {new Date().toLocaleString()} | Build: US-2.2.0-{Date.now().toString(36).slice(-4).toUpperCase()}
+          </div>
+        </div>
+      </div>
+
+      {/* Action Footer */}
+      <div className="border-t border-slate-800 bg-slate-950/90 p-4">
+        <div className="max-w-4xl mx-auto flex flex-wrap gap-3 justify-center">
           <button
             onClick={() => {
-              // Store crash data for def-dev
               localStorage.setItem('urbanshade_crash_entry', JSON.stringify({
                 stopCode: resolvedCrashData.stopCode,
                 process: resolvedCrashData.process,
                 module: resolvedCrashData.module || stopInfo.whatFailed,
-                timestamp: new Date().toISOString()
+                timestamp: new Date().toISOString(),
+                fromError: true
               }));
               window.location.href = "/def-dev?from=crash";
             }}
-            className="flex items-center gap-2 px-6 md:px-8 py-3 bg-amber-500/30 hover:bg-amber-500/40 text-amber-100 font-semibold transition-colors text-base md:text-lg border border-amber-400/50 rounded"
+            className="flex items-center gap-2 px-5 py-3 bg-amber-600/20 hover:bg-amber-600/30 text-amber-400 rounded-lg border border-amber-500/30 transition-colors"
           >
             <Bug className="w-5 h-5" />
             Debug Error
           </button>
-        </div>
-
-        {/* Debug info at bottom */}
-        <div className="absolute bottom-6 md:bottom-8 left-8 md:left-16 right-8 md:right-16 text-xs font-mono opacity-50">
-          <div className="flex flex-col md:flex-row justify-between gap-2">
-            <span>URBANSHADE OS Build 22621.2428</span>
-            <span>{new Date().toLocaleString()}</span>
-          </div>
+          <button
+            onClick={onReboot}
+            className="flex items-center gap-2 px-6 py-3 bg-red-600 hover:bg-red-500 text-white rounded-lg font-bold transition-colors shadow-lg shadow-red-600/30"
+          >
+            <RefreshCw className="w-5 h-5" />
+            Restart System
+          </button>
         </div>
       </div>
     </div>
