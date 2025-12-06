@@ -23,6 +23,8 @@ import DefDevTerminal from "./pages/docs/defdev/Terminal";
 import DefDevAdmin from "./pages/docs/defdev/Admin";
 import DefDevBugchecks from "./pages/docs/defdev/Bugchecks";
 import DefDevAPI from "./pages/docs/defdev/API";
+import DefDevDiagnostics from "./pages/docs/defdev/Diagnostics";
+import UURDocs from "./pages/docs/UUR";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -58,6 +60,8 @@ const App = () => (
         <Route path="/docs/def-dev/admin" element={<DefDevAdmin />} />
         <Route path="/docs/def-dev/bugchecks" element={<DefDevBugchecks />} />
         <Route path="/docs/def-dev/api" element={<DefDevAPI />} />
+        <Route path="/docs/def-dev/diagnostics" element={<DefDevDiagnostics />} />
+        <Route path="/docs/uur" element={<UURDocs />} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>

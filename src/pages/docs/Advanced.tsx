@@ -1,4 +1,4 @@
-import { ArrowLeft, Cpu, RotateCcw, Shield, Wrench, Lock, Skull } from "lucide-react";
+import { ArrowLeft, Cpu, RotateCcw, Shield, Wrench, Lock, Skull, Bug, Zap } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Advanced = () => {
@@ -137,6 +137,73 @@ const Advanced = () => {
                 {" "}for detailed instructions and creative chaos ideas.
               </p>
             </div>
+          </div>
+        </section>
+
+        <section className="space-y-6">
+          <div className="flex items-center gap-3">
+            <Bug className="w-8 h-8 text-amber-400" />
+            <h3 className="text-2xl font-bold">DEF-DEV Console</h3>
+          </div>
+          <div className="p-6 rounded-lg bg-amber-500/10 border border-amber-500/30 space-y-4">
+            <p className="text-muted-foreground">
+              DEF-DEV (Developer Environment Framework) is the ultimate debugging tool for UrbanShade OS. 
+              It provides real-time system monitoring, storage inspection, and remote command execution.
+            </p>
+            <div className="space-y-2">
+              <h4 className="font-bold text-amber-400">How to access:</h4>
+              <ul className="space-y-1 text-sm text-muted-foreground ml-4">
+                <li>• Enable Developer Mode in Settings → Developer Options</li>
+                <li>• Navigate to <code className="bg-black/50 px-2 py-0.5 rounded">/def-dev</code></li>
+                <li>• Or open from crash screen's "Debug Error" button</li>
+              </ul>
+            </div>
+            <div className="space-y-2">
+              <h4 className="font-bold text-amber-400">Key Features:</h4>
+              <ul className="space-y-1 text-sm text-muted-foreground ml-4">
+                <li>• <strong>Console Tab</strong> - Real-time log capture with error simplification</li>
+                <li>• <strong>Actions Tab</strong> - Monitor all system events with persistence</li>
+                <li>• <strong>Storage Tab</strong> - Inspect and edit localStorage entries</li>
+                <li>• <strong>Terminal</strong> - Execute commands on the main OS remotely</li>
+                <li>• <strong>Recovery Images</strong> - Create and restore system snapshots</li>
+                <li>• <strong>Bugchecks</strong> - View crash history and analyze errors</li>
+              </ul>
+            </div>
+            <div className="p-3 rounded bg-amber-500/10 border border-amber-500/30">
+              <p className="text-sm text-amber-400">
+                <span className="font-bold">📖 Full documentation:</span> Check out the{" "}
+                <Link to="/docs/def-dev" className="underline hover:text-amber-300">
+                  DEF-DEV documentation
+                </Link>
+                {" "}for comprehensive guides on all features.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section className="space-y-6">
+          <div className="flex items-center gap-3">
+            <Zap className="w-8 h-8 text-cyan-400" />
+            <h3 className="text-2xl font-bold">SystemBus API</h3>
+          </div>
+          <div className="p-6 rounded-lg bg-cyan-500/10 border border-cyan-500/30 space-y-4">
+            <p className="text-muted-foreground">
+              The SystemBus is an internal event system that allows components to communicate 
+              and trigger system-wide events without direct dependencies.
+            </p>
+            <div className="space-y-2">
+              <h4 className="font-bold text-cyan-400">Available Events:</h4>
+              <ul className="space-y-1 text-sm text-muted-foreground ml-4">
+                <li>• <code className="bg-black/50 px-1 rounded">TRIGGER_CRASH</code> - Trigger a crash screen</li>
+                <li>• <code className="bg-black/50 px-1 rounded">TRIGGER_REBOOT</code> - Initiate system reboot</li>
+                <li>• <code className="bg-black/50 px-1 rounded">TRIGGER_SHUTDOWN</code> - Initiate shutdown</li>
+                <li>• <code className="bg-black/50 px-1 rounded">ENTER_RECOVERY</code> - Enter recovery mode</li>
+                <li>• <code className="bg-black/50 px-1 rounded">OPEN_DEV_MODE</code> - Open DEF-DEV console</li>
+              </ul>
+            </div>
+            <p className="text-xs text-cyan-400">
+              Access via browser console: <code className="bg-black/50 px-2 py-0.5 rounded">window.systemBus</code>
+            </p>
           </div>
         </section>
 

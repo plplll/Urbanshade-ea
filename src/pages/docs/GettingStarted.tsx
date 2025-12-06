@@ -60,6 +60,13 @@ const GettingStarted = () => {
                   <span className="text-muted-foreground"> - Everything. All of it. Maximum chaos potential.</span>
                 </div>
               </li>
+              <li className="flex items-start gap-3">
+                <CheckCircle className="w-5 h-5 text-primary mt-0.5" />
+                <div>
+                  <span className="font-bold">Developer</span>
+                  <span className="text-muted-foreground"> - Like Complete, but with DEF-DEV enabled from the start</span>
+                </div>
+              </li>
             </ul>
           </div>
         </section>
@@ -82,6 +89,11 @@ const GettingStarted = () => {
                 You can change most things later, but first impressions matter... to no one, because this is a simulation.
               </p>
             </div>
+            <p className="text-muted-foreground text-sm">
+              OOBE also asks about enabling Developer Mode. If you're into debugging, 
+              system exploration, or just want to break things, say yes! You can always 
+              enable it later in Settings.
+            </p>
           </div>
         </section>
 
@@ -132,6 +144,36 @@ const GettingStarted = () => {
               It's just like a real operating system, except nothing you do here will 
               accidentally delete your actual files. We hope.
             </p>
+          </div>
+        </section>
+
+        <section className="space-y-6">
+          <h3 className="text-2xl font-bold flex items-center gap-3">
+            <span className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-black font-bold">5</span>
+            Keyboard Shortcuts
+          </h3>
+          <div className="p-6 rounded-lg bg-black/40 border border-white/10 space-y-4">
+            <p className="text-muted-foreground">
+              Master these shortcuts to navigate like a pro:
+            </p>
+            <div className="grid md:grid-cols-2 gap-4 text-sm">
+              <div className="p-3 bg-black/40 rounded-lg">
+                <code className="text-primary">Ctrl + Shift + T</code>
+                <p className="text-muted-foreground text-xs mt-1">Open Terminal</p>
+              </div>
+              <div className="p-3 bg-black/40 rounded-lg">
+                <code className="text-primary">Ctrl + Shift + D</code>
+                <p className="text-muted-foreground text-xs mt-1">Open DEF-DEV (if enabled)</p>
+              </div>
+              <div className="p-3 bg-black/40 rounded-lg">
+                <code className="text-primary">Alt + F4</code>
+                <p className="text-muted-foreground text-xs mt-1">Close active window</p>
+              </div>
+              <div className="p-3 bg-black/40 rounded-lg">
+                <code className="text-primary">F11</code>
+                <p className="text-muted-foreground text-xs mt-1">Toggle fullscreen</p>
+              </div>
+            </div>
           </div>
         </section>
 
