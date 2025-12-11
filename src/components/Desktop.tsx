@@ -7,10 +7,14 @@ import { RecoveryMode } from "./RecoveryMode";
 import { ContextMenu, getDesktopMenuItems } from "./ContextMenu";
 import { AltTabSwitcher } from "./AltTabSwitcher";
 import { DesktopSwitcher } from "./DesktopSwitcher";
+import { WindowSnapIndicator } from "./WindowSnapIndicator";
 import { actionDispatcher } from "@/lib/actionDispatcher";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useMultipleDesktops } from "@/hooks/useMultipleDesktops";
 import { useOnlineAccount } from "@/hooks/useOnlineAccount";
+import { useAutoSync } from "@/hooks/useAutoSync";
+import { useWindowSnap, SnapZone } from "@/hooks/useWindowSnap";
+import { useNotifications } from "@/hooks/useNotifications";
 import { FileText, Database, Activity, Radio, FileBox, AlertTriangle, Terminal, Users, Wifi, Cpu, Mail, Globe, Music, Camera, Shield, MapPin, BookOpen, Zap, Wind, Calculator as CalcIcon, Lock, FileWarning, Grid3x3, ShoppingBag, StickyNote, Palette, Volume2, CloudRain, Clock as ClockIcon, Calendar, Newspaper, Key, HardDrive, FileArchive, FileText as PdfIcon, Sheet, Presentation, Video, Image, Mic, Gamepad2, MessageSquare, VideoIcon, MailOpen, FolderUp, TerminalSquare, Network, HardDrive as DiskIcon, Settings as SettingsIcon, Activity as PerformanceIcon, ScanLine, Languages, BookOpenCheck, Globe2, MapPinned, Telescope, Beaker, Calculator as PhysicsIcon, Fingerprint, Lock as EncryptionIcon, KeyRound, Download, Puzzle, Skull, Monitor, Package } from "lucide-react";
 import { toast } from "sonner";
 import { useSearchParams } from "react-router-dom";
@@ -61,6 +65,21 @@ export const Desktop = ({
   
   // Online account sync
   const { isOnlineMode, isDevMode, syncSettings } = useOnlineAccount();
+  const { manualSync } = useAutoSync();
+  const { addNotification } = useNotifications();
+  const { snapZone, handleDragMove, handleDragEnd, clearSnapZone } = useWindowSnap();
+  
+  // Welcome notification for online users (only once per session)
+  useEffect(() => {
+    if (isOnlineMode && !sessionStorage.getItem("welcomed")) {
+      sessionStorage.setItem("welcomed", "true");
+      addNotification({
+        title: "Welcome Back!",
+        message: "You're signed in with your online account. Settings will sync automatically.",
+        type: "success"
+      });
+    }
+  }, [isOnlineMode, addNotification]);
   
   // Load background gradient from settings
   const [bgGradient, setBgGradient] = useState(() => {
@@ -768,7 +787,11 @@ export const Desktop = ({
         onShutdown={onShutdown}
         onReboot={onReboot}
         onLogout={onLogout}
+        onOpenSettings={() => settingsApp && openWindow(settingsApp)}
       />
+
+      {/* Window Snap Indicator */}
+      <WindowSnapIndicator zone={snapZone} />
 
       {/* Context Menu */}
       {contextMenu && (
@@ -777,7 +800,10 @@ export const Desktop = ({
           y={contextMenu.y}
           items={getDesktopMenuItems(
             () => toast.info("Folder creation coming soon!"),
-            () => settingsApp && openWindow(settingsApp)
+            () => settingsApp && openWindow(settingsApp),
+            () => window.location.reload(),
+            isOnlineMode ? () => manualSync() : undefined,
+            isOnlineMode
           )}
           onClose={() => setContextMenu(null)}
         />

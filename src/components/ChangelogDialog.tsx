@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Sparkles, Check, Cloud, PartyPopper } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Sparkles, Check, Cloud, PartyPopper, Rocket, Zap, Shield, Settings, Monitor, Bell, Layout, Palette } from "lucide-react";
 
 export const ChangelogDialog = () => {
   const [open, setOpen] = useState(false);
-  const [selectedVersion, setSelectedVersion] = useState("2.7");
-  const currentVersion = "2.7";
+  const [selectedVersion, setSelectedVersion] = useState("2.8");
+  const currentVersion = "2.8";
 
   useEffect(() => {
     const lastSeenVersion = localStorage.getItem("urbanshade_last_seen_version");
@@ -20,297 +21,218 @@ export const ChangelogDialog = () => {
     setOpen(false);
   };
 
-  const changelogs: Record<string, Record<string, string[]>> = {
+  const changelogs: Record<string, { icon: React.ReactNode; color: string; sections: Record<string, string[]> }> = {
+    "2.8": {
+      icon: <Rocket className="w-6 h-6" />,
+      color: "from-cyan-500 to-blue-600",
+      sections: {
+        "Quality & Polish": [
+          "Complete changelog redesign with modern UI",
+          "Enhanced sync system with 2-minute intervals",
+          "Do Not Disturb mode for notifications",
+          "Quick Settings flyout from taskbar"
+        ],
+        "Window Management": [
+          "Window snap zones - drag to edges for quick positioning",
+          "Visual snap indicators when dragging",
+          "Improved window controls and animations"
+        ],
+        "Desktop Enhancements": [
+          "Enhanced right-click context menu with more options",
+          "View options (Large/Medium/Small icons)",
+          "Sort icons by name, type, or date",
+          "Personalize and display settings shortcuts"
+        ],
+        "Start Menu": [
+          "Recent files section showing last opened items",
+          "Improved search functionality",
+          "Better app grid layout"
+        ],
+        "Online Experience": [
+          "Welcome notification for new users",
+          "Offline indicator with pending sync count",
+          "Device name tracking for synced settings",
+          "Theme presets for quick customization"
+        ]
+      }
+    },
     "2.7": {
-      "Quality of Life": [
-        "Updated version numbers throughout the system to v2.7",
-        "Start Menu now shows your actual username and role",
-        "Cloud sync indicator in Start Menu when online",
-        "Copyright year updated to 2025"
-      ],
-      "Online Accounts": [
-        "UUR submissions now sync to Supabase cloud storage",
-        "Better visual feedback for sync status",
-        "Connected email displayed in Settings"
-      ],
-      "UUR Manager Redesign": [
-        "Complete visual overhaul with advanced UI",
-        "New sidebar navigation with category filters",
-        "Enhanced package cards with detailed info",
-        "Statistics dashboard showing package counts",
-        "Real-time submission status from cloud database",
-        "Improved search with category filtering"
-      ]
+      icon: <Cloud className="w-6 h-6" />,
+      color: "from-blue-500 to-purple-600",
+      sections: {
+        "Quality of Life": [
+          "Updated version numbers throughout the system to v2.7",
+          "Start Menu now shows your actual username and role",
+          "Cloud sync indicator in Start Menu when online",
+          "Copyright year updated to 2025"
+        ],
+        "Online Accounts": [
+          "UUR submissions now sync to Supabase cloud storage",
+          "Better visual feedback for sync status",
+          "Connected email displayed in Settings"
+        ],
+        "UUR Manager Redesign": [
+          "Complete visual overhaul with advanced UI",
+          "New sidebar navigation with category filters",
+          "Enhanced package cards with detailed info",
+          "Statistics dashboard showing package counts"
+        ]
+      }
     },
     "2.6": {
-      "Online Accounts": [
-        "Full Supabase-powered online account system",
-        "Sign up and sign in with email and password",
-        "Automatic settings sync every 2 minutes",
-        "Cloud backup of desktop icons, installed apps, and system settings",
-        "Online account management in Settings (when signed in)",
-        "Sync status indicator in taskbar",
-        "Manual sync button and last sync time display",
-        "Profile management with display name and avatar"
-      ],
-      "Settings Improvements": [
-        "New 'Online Account' section (visible when signed in)",
-        "View account info, email, and sync status",
-        "Sign out and switch to local mode",
-        "Force sync from cloud option"
-      ],
-      "System Enhancements": [
-        "Taskbar now shows cloud sync indicator when online",
-        "Improved sync reliability with change detection",
-        "Sync on page close to prevent data loss"
-      ]
+      icon: <Shield className="w-6 h-6" />,
+      color: "from-green-500 to-emerald-600",
+      sections: {
+        "Online Accounts": [
+          "Full Supabase-powered online account system",
+          "Sign up and sign in with email and password",
+          "Automatic settings sync every 2 minutes",
+          "Cloud backup of desktop icons, installed apps, and system settings"
+        ],
+        "Settings Improvements": [
+          "New 'Online Account' section (visible when signed in)",
+          "View account info, email, and sync status",
+          "Sign out and switch to local mode"
+        ]
+      }
     },
     "2.5": {
-      "UUR Manager": [
-        "New UUR Manager app accessible from Desktop and Terminal",
-        "Real built-in packages: Hello World (test app) and System Info (utility)",
-        "Package submission system for community contributions",
-        "Install, uninstall, and run UUR apps directly in the OS",
-        "GitHub-based package submission with review workflow"
-      ],
-      "CrashScreen Redesign": [
-        "Styled crash screen with different colors per crash type",
-        "Clear labeling as 'Styled Crash Screen' for testing",
-        "Distinct visual separation from real BugcheckScreen"
-      ],
-      "Command Queue Expansion": [
-        "Admin tools now use command queue instead of page redirects",
-        "Added UUR commands (uur inst, uur rm, uur up, uur search)",
-        "New commands: MAINTENANCE, SAFE_MODE, LOGOUT",
-        "Package management helpers for apt install/remove"
-      ],
-      "Documentation": [
-        "UUR docs expanded with full command reference",
-        "Table of contents and featured packages section",
-        "In-app Browser can now load documentation pages",
-        "DEF-DEV docs link added to UUR documentation"
-      ],
-      "DEF-DEV Improvements": [
-        "Redesigned DEF-DEV warning with terminal aesthetic",
-        "Enhanced admin tools using SystemBus APIs",
-        "Improved crash entry mode workflow"
-      ]
-    },
-    "2.4": {
-      "DEF-DEV Enhancements": [
-        "Redesigned warning screen with terminal aesthetic and detailed info",
-        "Added first-boot DEF-DEV setup with consent flow",
-        "Persistent warning acceptance while dev mode is enabled",
-        "Alternative dev storage for development mode data",
-        "Enhanced crash entry mode with automatic bugcheck tab navigation",
-        "New Diagnostics tab for system health monitoring"
-      ],
-      "System Improvements": [
-        "AdminPanel now uses SystemBus API more extensively",
-        "Added UUR and Diagnostics routes to documentation",
-        "Fixed action logger spamming errors on open",
-        "Improved crash screen with clear 'not a simulation' message"
-      ],
-      "Documentation Updates": [
-        "Expanded all documentation sections",
-        "Added UUR (UrbanShade User Repository) documentation",
-        "New Diagnostics documentation page",
-        "Updated DEF-DEV Index with new sections",
-        "Enhanced Getting Started and Applications guides"
-      ],
-      "Bug Fixes": [
-        "Fixed dev mode toggle opening DEF-DEV in new window before refresh",
-        "Fixed logging not working properly in DEF-DEV",
-        "Corrected HTML title to show v2.4"
-      ]
-    },
-    "2.3": {
-      "DEF-DEV Overhaul": [
-        "Complete DEF-DEV documentation with 8 dedicated sub-pages",
-        "New DEF-DEV Terminal with command queue support for remote execution",
-        "Enhanced bugcheck system with detailed error analysis",
-        "Action monitoring with persistence and consent system",
-        "Recovery image management with import/export/editing"
-      ],
-      "Bugcheck System": [
-        "New BugcheckScreen with severity levels and readable explanations",
-        "Automatic bugcheck logging to DEF-DEV console",
-        "System info capture including memory usage and browser details",
-        "Stack trace support for debugging"
-      ],
-      "Documentation": [
-        "DEF-DEV Setup & Access guide",
-        "Console Tab documentation",
-        "Actions Tab documentation",
-        "Storage Tab documentation",
-        "Terminal documentation",
-        "Admin Panel documentation",
-        "Bugchecks documentation",
-        "API Reference documentation"
-      ],
-      "Improvements": [
-        "Enhanced crash screen with detailed 'not a simulation' warning",
-        "Fixed desktop icon dragging issues - now uses grid layout",
-        "DEF-DEV link added to main documentation page"
-      ]
-    },
-    "2.2": {
-      "New Features": [
-        "Added comprehensive Documentation System with 7 detailed guide pages",
-        "Power menu now includes 'Reboot Options' dropdown with BIOS and Recovery shortcuts",
-        "Created multi-version changelog viewer to track update history",
-        "Enhanced disclaimer screen with detailed privacy and security information"
-      ],
-      "Improvements": [
-        "Documentation includes jokes and personality for better user experience",
-        "Improved startup disclaimer with clearer data storage explanations",
-        "Better navigation between documentation pages",
-        "Enhanced visual consistency across system components"
-      ],
-      "Bug Fixes": [
-        "Fixed window minimize functionality - windows now properly minimize to taskbar",
-        "Fixed new user accounts not appearing on login screen",
-        "Improved account persistence across sessions"
-      ],
-      "Documentation": [
-        "Getting Started guide for new users",
-        "Core Applications reference",
-        "Facility Applications guide",
-        "Terminal command reference",
-        "Advanced Features documentation",
-        "Keyboard Shortcuts reference",
-        "Troubleshooting guide"
-      ]
-    },
-    "2.1": {
-      "New Features": [
-        "Redesigned BIOS to modern UEFI interface",
-        "Added proper app installer with configuration options",
-        "File Reader now supports editing files",
-        "Enhanced Task Manager with more detailed process information",
-        "Improved Emergency Protocols with additional options",
-        "Added 'Open with File Reader' integration in File Explorer"
-      ],
-      "Improvements": [
-        "Recovery Mode now uses consistent Urbanshade theme",
-        "Settings now have more functional options",
-        "Enhanced hallway visuals in Facility Planner",
-        "Better UI consistency across all applications",
-        "Improved contributor attribution (Aswdbatch)",
-        "Better facility plan export functionality"
-      ],
-      "Bug Fixes": [
-        "Fixed File Reader not appearing in app list",
-        "Fixed Facility Planner room selection issues",
-        "Corrected version numbers throughout system",
-        "Various stability improvements"
-      ],
-      "System Updates": [
-        "Updated to Urbanshade OS v2.1",
-        "Improved performance and responsiveness",
-        "Better error handling throughout the system",
-        "Enhanced animations and transitions"
-      ]
+      icon: <Zap className="w-6 h-6" />,
+      color: "from-yellow-500 to-orange-600",
+      sections: {
+        "UUR Manager": [
+          "New UUR Manager app accessible from Desktop and Terminal",
+          "Real built-in packages: Hello World and System Info",
+          "Package submission system for community contributions"
+        ],
+        "CrashScreen Redesign": [
+          "Styled crash screen with different colors per crash type",
+          "Clear labeling for testing purposes"
+        ]
+      }
     },
     "2.0": {
-      "Major Changes": [
-        "Complete rewrite using React and Tailwind CSS",
-        "Modern component-based architecture",
-        "Improved performance and maintainability",
-        "Enhanced visual design system"
-      ],
-      "New Foundation": [
-        "TypeScript for better code quality",
-        "Vite for faster development",
-        "Modern build pipeline",
-        "Responsive design system"
-      ]
+      icon: <Monitor className="w-6 h-6" />,
+      color: "from-gray-500 to-slate-600",
+      sections: {
+        "Major Changes": [
+          "Complete rewrite using React and Tailwind CSS",
+          "Modern component-based architecture",
+          "TypeScript for better code quality"
+        ]
+      }
     }
   };
 
-  const changelog = changelogs[selectedVersion] || changelogs["2.7"];
-  const isLatestVersion = selectedVersion === "2.7";
+  const versionData = changelogs[selectedVersion];
+  const isLatestVersion = selectedVersion === currentVersion;
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto animate-scale-in">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-2xl">
-            <Sparkles className="w-6 h-6 text-primary animate-pulse" />
-            URBANSHADE OS Updates
-          </DialogTitle>
-        </DialogHeader>
+      <DialogContent className="max-w-4xl h-[90vh] p-0 overflow-hidden animate-scale-in bg-background/95 backdrop-blur-2xl border-primary/20">
+        {/* Hero Header */}
+        <div className={`relative px-8 py-10 bg-gradient-to-br ${versionData?.color || "from-primary to-primary/60"} overflow-hidden`}>
+          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJNMzYgMzRjMC0yIDItNCAyLTRzLTItMi00LTJjLTQgMC00IDQtNCA0czAgNCA0IDRjMiAwIDItMiAyLTJ6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-30" />
+          <div className="relative z-10">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center">
+                {versionData?.icon || <Sparkles className="w-8 h-8 text-white" />}
+              </div>
+              <div>
+                <h1 className="text-3xl font-black text-white">URBANSHADE OS</h1>
+                <p className="text-white/80 font-mono">Version {selectedVersion}</p>
+              </div>
+            </div>
+            {isLatestVersion && (
+              <div className="flex items-center gap-2 mt-4">
+                <span className="px-3 py-1 bg-white/20 backdrop-blur rounded-full text-sm font-bold text-white flex items-center gap-2">
+                  <PartyPopper className="w-4 h-4" /> Latest Release
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
 
         {/* Version Selector */}
-        <div className="flex gap-2 flex-wrap mb-4">
+        <div className="flex gap-2 px-6 py-4 border-b border-border/50 overflow-x-auto">
           {Object.keys(changelogs).map((version) => (
             <button
               key={version}
               onClick={() => setSelectedVersion(version)}
-              className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+              className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all whitespace-nowrap ${
                 selectedVersion === version
-                  ? "bg-primary text-black"
-                  : "bg-black/40 border border-white/10 hover:border-primary/50"
+                  ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30"
+                  : "bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground"
               }`}
             >
               v{version}
+              {version === currentVersion && (
+                <span className="ml-2 px-1.5 py-0.5 bg-white/20 rounded text-[10px]">NEW</span>
+              )}
             </button>
           ))}
         </div>
 
-        <div className="text-sm text-muted-foreground mb-4">
-          {selectedVersion === currentVersion && <span className="text-primary font-semibold">Latest Version</span>}
-          {selectedVersion === "2.0" && <span className="text-yellow-500">Foundation Release - React Migration</span>}
-        </div>
-
-        {/* Special v2.6 Announcement */}
+        {/* Special Announcement for Latest */}
         {isLatestVersion && (
-          <div className="mb-6 p-6 rounded-xl bg-gradient-to-br from-primary/20 via-blue-500/10 to-purple-500/10 border border-primary/30">
-            <div className="flex items-center gap-3 mb-4">
-              <PartyPopper className="w-8 h-8 text-primary animate-bounce" />
-              <Cloud className="w-8 h-8 text-blue-400 animate-pulse" />
+          <div className="mx-6 mt-4 p-5 rounded-xl bg-gradient-to-r from-primary/10 via-accent/5 to-primary/10 border border-primary/20">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center shrink-0">
+                <Rocket className="w-6 h-6 text-primary animate-bounce" />
+              </div>
+              <div>
+                <h3 className="font-bold text-lg text-foreground mb-1">Quality & Polish Update</h3>
+                <p className="text-sm text-muted-foreground">
+                  This update focuses on improving the overall user experience with better window management, 
+                  enhanced sync reliability, and tons of quality-of-life improvements!
+                </p>
+              </div>
             </div>
-            <h2 className="text-2xl font-black text-primary mb-3 leading-tight">
-              Hello, Users of Urbanshade OS! I am very, VERY proud to announce this. After a bit of help from AI, Hours of debugging, and nights crying in bed... ONLINE ACCOUNTS ARE NOW REAL.
-            </h2>
-            <p className="text-base text-foreground/90">
-              YOU READ THAT RIGHT! THE BIGGEST URBANSHADE OS UPDATE YET - ONLINE ACCOUNTS. THANKS TO SUPABASE FOR MAKING THIS POSSIBLE! THANK THEM VERY MUCH, AND THANK YOU, FOR USING THIS :D
-            </p>
           </div>
         )}
 
-        <div className="space-y-6 py-4">
-          {Object.entries(changelog).map(([section, items], sectionIndex) => (
-            <div key={section} className="space-y-3">
-              <h3 className="text-lg font-bold text-primary flex items-center gap-2">
-                <Check className="w-5 h-5" />
-                {section}
-              </h3>
-              <ul className="space-y-2 text-sm ml-7">
-                {items.map((text, i) => (
-                  <li
-                    key={i}
-                    className="flex items-start gap-2 animate-fade-in"
-                    style={{ animationDelay: `${0.1 * (sectionIndex * 5 + i)}s` }}
-                  >
-                    <span className="text-primary mt-0.5">•</span>
-                    <span>{text}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-
-          <div className="pt-4 border-t border-border/50">
-            <p className="text-xs text-muted-foreground text-center">
-              Thank you for using URBANSHADE OS!
-            </p>
+        {/* Changelog Content */}
+        <ScrollArea className="flex-1 px-6 py-4 h-[calc(90vh-350px)]">
+          <div className="space-y-6 pb-6">
+            {Object.entries(versionData?.sections || {}).map(([section, items], sectionIndex) => (
+              <div 
+                key={section} 
+                className="rounded-xl border border-border/50 overflow-hidden animate-fade-in"
+                style={{ animationDelay: `${sectionIndex * 100}ms` }}
+              >
+                <div className="px-5 py-3 bg-muted/30 border-b border-border/30 flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
+                    <Check className="w-4 h-4 text-primary" />
+                  </div>
+                  <h3 className="font-bold text-foreground">{section}</h3>
+                  <span className="ml-auto text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded-full">
+                    {items.length} changes
+                  </span>
+                </div>
+                <ul className="p-4 space-y-3">
+                  {items.map((text, i) => (
+                    <li
+                      key={i}
+                      className="flex items-start gap-3 text-sm animate-fade-in"
+                      style={{ animationDelay: `${(sectionIndex * 100) + (i * 50)}ms` }}
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" />
+                      <span className="text-foreground/90">{text}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
           </div>
-        </div>
+        </ScrollArea>
 
-        <div className="flex justify-end">
-          <Button onClick={handleClose} className="animate-fade-in">
-            Got it!
+        {/* Footer */}
+        <div className="px-6 py-4 border-t border-border/50 bg-muted/20 flex items-center justify-between">
+          <p className="text-xs text-muted-foreground">
+            Thank you for using URBANSHADE OS! 🎉
+          </p>
+          <Button onClick={handleClose} size="lg" className="px-8 font-bold">
+            Let's Go!
           </Button>
         </div>
       </DialogContent>

@@ -213,20 +213,25 @@ export const useAutoSync = () => {
     setCloudSettings(null);
   }, [cloudSettings, loadCloudSettings, performSync, addHistoryEntry, addNotification]);
 
-  // Auto-sync every 2 minutes
+  // Auto-sync every 2 minutes - use refs to avoid re-creating interval
   useEffect(() => {
     if (isDevMode || !isOnlineMode || !user) return;
 
-    // Initial sync on mount (silent)
-    performSync(true, true);
+    // Initial sync after a short delay (silent) - only once
+    const initialTimeout = setTimeout(() => {
+      performSync(false, true);
+    }, 5000); // Wait 5 seconds after mount before first sync
 
     // Set up interval (2 minutes = 120000ms)
     const interval = setInterval(() => {
       performSync(false, true);
     }, 120000);
 
-    return () => clearInterval(interval);
-  }, [isDevMode, isOnlineMode, user, performSync]);
+    return () => {
+      clearTimeout(initialTimeout);
+      clearInterval(interval);
+    };
+  }, [isDevMode, isOnlineMode, user?.id]); // Only depend on user.id, not the full performSync
 
   // Sync pending changes when coming back online
   useEffect(() => {
