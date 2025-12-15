@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Sparkles, Check, Cloud, PartyPopper, Rocket, Zap, Shield, Settings, Monitor, Bell, Layout, Palette } from "lucide-react";
+import { Sparkles, Check, Cloud, PartyPopper, Rocket, Zap, Shield, Monitor, Star, ArrowRight } from "lucide-react";
 
 export const ChangelogDialog = () => {
   const [open, setOpen] = useState(false);
@@ -21,10 +21,11 @@ export const ChangelogDialog = () => {
     setOpen(false);
   };
 
-  const changelogs: Record<string, { icon: React.ReactNode; color: string; sections: Record<string, string[]> }> = {
+  const changelogs: Record<string, { icon: React.ReactNode; color: string; tagline: string; sections: Record<string, string[]> }> = {
     "2.8": {
-      icon: <Rocket className="w-6 h-6" />,
+      icon: <Rocket className="w-5 h-5" />,
       color: "from-cyan-500 to-blue-600",
+      tagline: "Quality & Polish Update",
       sections: {
         "Quality & Polish": [
           "Complete changelog redesign with modern UI",
@@ -57,8 +58,9 @@ export const ChangelogDialog = () => {
       }
     },
     "2.7": {
-      icon: <Cloud className="w-6 h-6" />,
+      icon: <Cloud className="w-5 h-5" />,
       color: "from-blue-500 to-purple-600",
+      tagline: "Cloud Sync Update",
       sections: {
         "Quality of Life": [
           "Updated version numbers throughout the system to v2.7",
@@ -80,8 +82,9 @@ export const ChangelogDialog = () => {
       }
     },
     "2.6": {
-      icon: <Shield className="w-6 h-6" />,
+      icon: <Shield className="w-5 h-5" />,
       color: "from-green-500 to-emerald-600",
+      tagline: "Security Update",
       sections: {
         "Online Accounts": [
           "Full Supabase-powered online account system",
@@ -97,8 +100,9 @@ export const ChangelogDialog = () => {
       }
     },
     "2.5": {
-      icon: <Zap className="w-6 h-6" />,
+      icon: <Zap className="w-5 h-5" />,
       color: "from-yellow-500 to-orange-600",
+      tagline: "UUR Manager Update",
       sections: {
         "UUR Manager": [
           "New UUR Manager app accessible from Desktop and Terminal",
@@ -112,8 +116,9 @@ export const ChangelogDialog = () => {
       }
     },
     "2.0": {
-      icon: <Monitor className="w-6 h-6" />,
+      icon: <Monitor className="w-5 h-5" />,
       color: "from-gray-500 to-slate-600",
+      tagline: "Major Rewrite",
       sections: {
         "Major Changes": [
           "Complete rewrite using React and Tailwind CSS",
@@ -126,114 +131,144 @@ export const ChangelogDialog = () => {
 
   const versionData = changelogs[selectedVersion];
   const isLatestVersion = selectedVersion === currentVersion;
+  const versions = Object.keys(changelogs);
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-4xl h-[90vh] p-0 overflow-hidden animate-scale-in bg-background/95 backdrop-blur-2xl border-primary/20">
-        {/* Hero Header */}
-        <div className={`relative px-8 py-10 bg-gradient-to-br ${versionData?.color || "from-primary to-primary/60"} overflow-hidden`}>
-          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJNMzYgMzRjMC0yIDItNCAyLTRzLTItMi00LTJjLTQgMC00IDQtNCA0czAgNCA0IDRjMiAwIDItMiAyLTJ6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-30" />
-          <div className="relative z-10">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center">
-                {versionData?.icon || <Sparkles className="w-8 h-8 text-white" />}
-              </div>
-              <div>
-                <h1 className="text-3xl font-black text-white">URBANSHADE OS</h1>
-                <p className="text-white/80 font-mono">Version {selectedVersion}</p>
-              </div>
-            </div>
-            {isLatestVersion && (
-              <div className="flex items-center gap-2 mt-4">
-                <span className="px-3 py-1 bg-white/20 backdrop-blur rounded-full text-sm font-bold text-white flex items-center gap-2">
-                  <PartyPopper className="w-4 h-4" /> Latest Release
-                </span>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Version Selector */}
-        <div className="flex gap-2 px-6 py-4 border-b border-border/50 overflow-x-auto">
-          {Object.keys(changelogs).map((version) => (
-            <button
-              key={version}
-              onClick={() => setSelectedVersion(version)}
-              className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all whitespace-nowrap ${
-                selectedVersion === version
-                  ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30"
-                  : "bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              v{version}
-              {version === currentVersion && (
-                <span className="ml-2 px-1.5 py-0.5 bg-white/20 rounded text-[10px]">NEW</span>
-              )}
-            </button>
-          ))}
-        </div>
-
-        {/* Special Announcement for Latest */}
-        {isLatestVersion && (
-          <div className="mx-6 mt-4 p-5 rounded-xl bg-gradient-to-r from-primary/10 via-accent/5 to-primary/10 border border-primary/20">
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center shrink-0">
-                <Rocket className="w-6 h-6 text-primary animate-bounce" />
-              </div>
-              <div>
-                <h3 className="font-bold text-lg text-foreground mb-1">Quality & Polish Update</h3>
-                <p className="text-sm text-muted-foreground">
-                  This update focuses on improving the overall user experience with better window management, 
-                  enhanced sync reliability, and tons of quality-of-life improvements!
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Changelog Content */}
-        <ScrollArea className="flex-1 px-6 py-4 h-[calc(90vh-350px)]">
-          <div className="space-y-6 pb-6">
-            {Object.entries(versionData?.sections || {}).map(([section, items], sectionIndex) => (
-              <div 
-                key={section} 
-                className="rounded-xl border border-border/50 overflow-hidden animate-fade-in"
-                style={{ animationDelay: `${sectionIndex * 100}ms` }}
-              >
-                <div className="px-5 py-3 bg-muted/30 border-b border-border/30 flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
-                    <Check className="w-4 h-4 text-primary" />
-                  </div>
-                  <h3 className="font-bold text-foreground">{section}</h3>
-                  <span className="ml-auto text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded-full">
-                    {items.length} changes
-                  </span>
+      <DialogContent className="max-w-5xl h-[85vh] p-0 overflow-hidden animate-scale-in bg-background border-border/50 gap-0">
+        <div className="flex h-full">
+          {/* Left Sidebar - Version List */}
+          <div className="w-56 bg-muted/30 border-r border-border/50 flex flex-col">
+            {/* Header */}
+            <div className="p-5 border-b border-border/50">
+              <div className="flex items-center gap-2 mb-1">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-primary-foreground font-black text-sm">
+                  U
                 </div>
-                <ul className="p-4 space-y-3">
-                  {items.map((text, i) => (
-                    <li
-                      key={i}
-                      className="flex items-start gap-3 text-sm animate-fade-in"
-                      style={{ animationDelay: `${(sectionIndex * 100) + (i * 50)}ms` }}
-                    >
-                      <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" />
-                      <span className="text-foreground/90">{text}</span>
-                    </li>
-                  ))}
-                </ul>
+                <span className="font-bold text-foreground">URBANSHADE</span>
               </div>
-            ))}
-          </div>
-        </ScrollArea>
+              <p className="text-xs text-muted-foreground mt-1">Release Notes</p>
+            </div>
 
-        {/* Footer */}
-        <div className="px-6 py-4 border-t border-border/50 bg-muted/20 flex items-center justify-between">
-          <p className="text-xs text-muted-foreground">
-            Thank you for using URBANSHADE OS! 🎉
-          </p>
-          <Button onClick={handleClose} size="lg" className="px-8 font-bold">
-            Let's Go!
-          </Button>
+            {/* Version List */}
+            <ScrollArea className="flex-1">
+              <div className="p-3 space-y-1">
+                {versions.map((version) => {
+                  const data = changelogs[version];
+                  const isSelected = selectedVersion === version;
+                  const isLatest = version === currentVersion;
+                  
+                  return (
+                    <button
+                      key={version}
+                      onClick={() => setSelectedVersion(version)}
+                      className={`w-full text-left p-3 rounded-xl transition-all duration-200 group ${
+                        isSelected
+                          ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
+                          : "hover:bg-muted text-foreground"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${
+                          isSelected ? "bg-primary-foreground/20" : "bg-muted"
+                        }`}>
+                          {data.icon}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-sm">v{version}</span>
+                            {isLatest && (
+                              <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${
+                                isSelected ? "bg-primary-foreground/20" : "bg-primary/20 text-primary"
+                              }`}>
+                                NEW
+                              </span>
+                            )}
+                          </div>
+                          <p className={`text-xs truncate ${
+                            isSelected ? "text-primary-foreground/70" : "text-muted-foreground"
+                          }`}>
+                            {data.tagline}
+                          </p>
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </ScrollArea>
+          </div>
+
+          {/* Right Content - Changelog Details */}
+          <div className="flex-1 flex flex-col">
+            {/* Version Header */}
+            <div className={`relative px-8 py-8 bg-gradient-to-br ${versionData?.color || "from-primary to-primary/60"} overflow-hidden`}>
+              <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJNMzYgMzRjMC0yIDItNCAyLTRzLTItMi00LTJjLTQgMC00IDQtNCA0czAgNCA0IDRjMiAwIDItMiAyLTJ6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-30" />
+              <div className="relative z-10">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center">
+                    {versionData?.icon || <Sparkles className="w-7 h-7 text-white" />}
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-3">
+                      <h1 className="text-3xl font-black text-white">Version {selectedVersion}</h1>
+                      {isLatestVersion && (
+                        <span className="px-3 py-1 bg-white/20 backdrop-blur rounded-full text-xs font-bold text-white flex items-center gap-1.5">
+                          <Star className="w-3 h-3" /> Latest
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-white/80 text-sm mt-1">{versionData?.tagline}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Changelog Content */}
+            <ScrollArea className="flex-1 p-6">
+              <div className="space-y-5 pb-4">
+                {Object.entries(versionData?.sections || {}).map(([section, items], sectionIndex) => (
+                  <div 
+                    key={section} 
+                    className="rounded-xl border border-border/50 overflow-hidden animate-fade-in bg-card/50"
+                    style={{ animationDelay: `${sectionIndex * 80}ms` }}
+                  >
+                    <div className="px-5 py-3 bg-muted/50 border-b border-border/30 flex items-center gap-3">
+                      <div className="w-7 h-7 rounded-lg bg-primary/20 flex items-center justify-center">
+                        <Check className="w-3.5 h-3.5 text-primary" />
+                      </div>
+                      <h3 className="font-bold text-foreground text-sm">{section}</h3>
+                      <span className="ml-auto text-[10px] text-muted-foreground bg-muted px-2 py-0.5 rounded-full font-medium">
+                        {items.length} {items.length === 1 ? 'change' : 'changes'}
+                      </span>
+                    </div>
+                    <ul className="p-4 space-y-2.5">
+                      {items.map((text, i) => (
+                        <li
+                          key={i}
+                          className="flex items-start gap-3 text-sm animate-fade-in group"
+                          style={{ animationDelay: `${(sectionIndex * 80) + (i * 40)}ms` }}
+                        >
+                          <ArrowRight className="w-3.5 h-3.5 text-primary mt-0.5 shrink-0 group-hover:translate-x-0.5 transition-transform" />
+                          <span className="text-foreground/85 leading-relaxed">{text}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+
+            {/* Footer */}
+            <div className="px-6 py-4 border-t border-border/50 bg-muted/20 flex items-center justify-between">
+              <p className="text-xs text-muted-foreground">
+                Thank you for using URBANSHADE OS!
+              </p>
+              <Button onClick={handleClose} className="px-8 font-bold">
+                Let's Go!
+              </Button>
+            </div>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

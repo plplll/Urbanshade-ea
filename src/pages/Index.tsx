@@ -19,6 +19,7 @@ import { UpdateScreen } from "@/components/UpdateScreen";
 import { AdminPanel } from "@/components/AdminPanel";
 import { LogoutScreen } from "@/components/LogoutScreen";
 import { DevModeConsole } from "@/components/DevModeConsole";
+import { LockScreen } from "@/components/LockScreen";
 import { BugcheckScreen, createBugcheck, BugcheckData } from "@/components/BugcheckScreen";
 import { actionDispatcher } from "@/lib/actionDispatcher";
 import { systemBus } from "@/lib/systemBus";
@@ -67,6 +68,7 @@ const Index = () => {
     return localStorage.getItem("urbanshade_disclaimer_accepted") === "true";
   });
   const [devModeOpen, setDevModeOpen] = useState(false);
+  const [isLocked, setIsLocked] = useState(false);
 
   // Check if admin setup is complete and setup key listeners
   useEffect(() => {
@@ -648,6 +650,12 @@ const Index = () => {
     }} />;
   }
 
+  if (isLocked) {
+    const currentUser = localStorage.getItem("urbanshade_current_user");
+    const username = currentUser ? JSON.parse(currentUser).name : "Administrator";
+    return <LockScreen onUnlock={() => setIsLocked(false)} username={username} />;
+  }
+
   return (
     <>
       <Desktop 
@@ -658,6 +666,7 @@ const Index = () => {
         onLockdown={handleLockdown}
         onEnterBios={handleEnterBios}
         onUpdate={() => setIsUpdating(true)}
+        onLock={() => setIsLocked(true)}
       />
       <ChangelogDialog />
       {maintenanceMode && <MaintenanceMode onExit={() => setMaintenanceMode(false)} />}

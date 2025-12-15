@@ -37,7 +37,8 @@ export const Desktop = ({
   onCriticalKill, 
   onLockdown, 
   onEnterBios, 
-  onUpdate 
+  onUpdate,
+  onLock
 }: { 
   onLogout: () => void; 
   onReboot: () => void; 
@@ -45,7 +46,8 @@ export const Desktop = ({
   onCriticalKill: (processName: string, type?: "kernel" | "virus" | "bluescreen" | "memory" | "corruption" | "overload") => void; 
   onLockdown?: (protocolName: string) => void; 
   onEnterBios?: () => void; 
-  onUpdate?: () => void; 
+  onUpdate?: () => void;
+  onLock?: () => void;
 }) => {
   const [startMenuOpen, setStartMenuOpen] = useState(false);
   const [windows, setWindows] = useState<Array<{ id: string; app: App; zIndex: number; minimized?: boolean }>>([]);
@@ -740,6 +742,20 @@ export const Desktop = ({
     }
   }, [windows, minimizeWindow]);
 
+  // Keyboard shortcuts
+  const { altTabActive, altTabIndex, sortedWindows: altTabWindows } = useKeyboardShortcuts({
+    windows,
+    onFocusWindow: focusWindow,
+    onMinimizeWindow: minimizeWindow,
+    onCloseWindow: closeWindow,
+    onToggleStartMenu: () => setStartMenuOpen(prev => !prev),
+    openWindow,
+    allApps,
+    onToggleSearch: () => setSearchOpen(prev => !prev),
+    onToggleTaskView: () => setTaskViewOpen(prev => !prev),
+    onLock
+  });
+
   return (
     <div 
       className="relative h-screen w-full overflow-hidden"
@@ -831,6 +847,15 @@ export const Desktop = ({
         onSwitchDesktop={switchDesktop}
         onCreateDesktop={createDesktop}
       />
+
+      {/* Alt+Tab Switcher */}
+      {altTabActive && altTabWindows.length > 1 && (
+        <AltTabSwitcher 
+          windows={altTabWindows}
+          activeIndex={altTabIndex}
+          isVisible={altTabActive}
+        />
+      )}
 
       {/* Context Menu */}
       {contextMenu && (
