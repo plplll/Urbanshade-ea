@@ -8,6 +8,8 @@ import { ContextMenu, getDesktopMenuItems } from "./ContextMenu";
 import { AltTabSwitcher } from "./AltTabSwitcher";
 import { DesktopSwitcher } from "./DesktopSwitcher";
 import { WindowSnapIndicator } from "./WindowSnapIndicator";
+import { GlobalSearch } from "./GlobalSearch";
+import { TaskView } from "./TaskView";
 import { actionDispatcher } from "@/lib/actionDispatcher";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useMultipleDesktops } from "@/hooks/useMultipleDesktops";
@@ -15,7 +17,7 @@ import { useOnlineAccount } from "@/hooks/useOnlineAccount";
 import { useAutoSync } from "@/hooks/useAutoSync";
 import { useWindowSnap, SnapZone } from "@/hooks/useWindowSnap";
 import { useNotifications } from "@/hooks/useNotifications";
-import { FileText, Database, Activity, Radio, FileBox, AlertTriangle, Terminal, Users, Wifi, Cpu, Mail, Globe, Music, Camera, Shield, MapPin, BookOpen, Zap, Wind, Calculator as CalcIcon, Lock, FileWarning, Grid3x3, ShoppingBag, StickyNote, Palette, Volume2, CloudRain, Clock as ClockIcon, Calendar, Newspaper, Key, HardDrive, FileArchive, FileText as PdfIcon, Sheet, Presentation, Video, Image, Mic, Gamepad2, MessageSquare, VideoIcon, MailOpen, FolderUp, TerminalSquare, Network, HardDrive as DiskIcon, Settings as SettingsIcon, Activity as PerformanceIcon, ScanLine, Languages, BookOpenCheck, Globe2, MapPinned, Telescope, Beaker, Calculator as PhysicsIcon, Fingerprint, Lock as EncryptionIcon, KeyRound, Download, Puzzle, Skull, Monitor, Package } from "lucide-react";
+import { FileText, Database, Activity, Radio, FileBox, AlertTriangle, Terminal, Users, Wifi, Cpu, Mail, Globe, Music, Camera, Shield, MapPin, BookOpen, Zap, Wind, Calculator as CalcIcon, Lock, FileWarning, Grid3x3, ShoppingBag, StickyNote, Palette, Volume2, CloudRain, Clock as ClockIcon, Calendar, Newspaper, Key, HardDrive, FileArchive, FileText as PdfIcon, Sheet, Presentation, Video, Image, Mic, Gamepad2, MessageSquare, VideoIcon, MailOpen, FolderUp, TerminalSquare, Network, HardDrive as DiskIcon, Settings as SettingsIcon, Activity as PerformanceIcon, ScanLine, Languages, BookOpenCheck, Globe2, MapPinned, Telescope, Beaker, Calculator as PhysicsIcon, Fingerprint, Lock as EncryptionIcon, KeyRound, Download, Puzzle, Skull, Monitor, Package, Search } from "lucide-react";
 import { toast } from "sonner";
 import { useSearchParams } from "react-router-dom";
 
@@ -35,7 +37,8 @@ export const Desktop = ({
   onCriticalKill, 
   onLockdown, 
   onEnterBios, 
-  onUpdate 
+  onUpdate,
+  onLock
 }: { 
   onLogout: () => void; 
   onReboot: () => void; 
@@ -43,12 +46,15 @@ export const Desktop = ({
   onCriticalKill: (processName: string, type?: "kernel" | "virus" | "bluescreen" | "memory" | "corruption" | "overload") => void; 
   onLockdown?: (protocolName: string) => void; 
   onEnterBios?: () => void; 
-  onUpdate?: () => void; 
+  onUpdate?: () => void;
+  onLock?: () => void;
 }) => {
   const [startMenuOpen, setStartMenuOpen] = useState(false);
   const [windows, setWindows] = useState<Array<{ id: string; app: App; zIndex: number; minimized?: boolean }>>([]);
   const [nextZIndex, setNextZIndex] = useState(100);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [taskViewOpen, setTaskViewOpen] = useState(false);
   
   // Multiple desktops
   const { 
@@ -722,6 +728,34 @@ export const Desktop = ({
 
   const settingsApp = allApps.find(app => app.id === 'settings');
 
+  // Handle Aero Shake - minimize all other windows
+  const handleAeroShake = useCallback((shakingWindowId: string) => {
+    let minimizedCount = 0;
+    windows.forEach(w => {
+      if (w.id !== shakingWindowId && !w.minimized) {
+        minimizeWindow(w.id);
+        minimizedCount++;
+      }
+    });
+    if (minimizedCount > 0) {
+      toast.info(`Minimized ${minimizedCount} window${minimizedCount > 1 ? 's' : ''}`);
+    }
+  }, [windows, minimizeWindow]);
+
+  // Keyboard shortcuts
+  const { altTabActive, altTabIndex, sortedWindows: altTabWindows } = useKeyboardShortcuts({
+    windows,
+    onFocusWindow: focusWindow,
+    onMinimizeWindow: minimizeWindow,
+    onCloseWindow: closeWindow,
+    onToggleStartMenu: () => setStartMenuOpen(prev => !prev),
+    openWindow,
+    allApps,
+    onToggleSearch: () => setSearchOpen(prev => !prev),
+    onToggleTaskView: () => setTaskViewOpen(prev => !prev),
+    onLock
+  });
+
   return (
     <div 
       className="relative h-screen w-full overflow-hidden"
@@ -730,15 +764,11 @@ export const Desktop = ({
       }}
       onContextMenu={handleContextMenu}
     >
-      {/* Desktop Icons */}
-      <div className="relative z-10 p-7">
-        <div className="grid grid-cols-10 gap-4">
+      {/* Desktop Icons - Grid layout */}
+      <div className="absolute inset-0 z-10 p-6 pointer-events-none">
+        <div className="grid grid-cols-[repeat(auto-fill,100px)] gap-4 pointer-events-auto">
           {desktopApps.map((app) => (
-            <DesktopIcon 
-              key={app.id}
-              app={app} 
-              onOpen={openWindow}
-            />
+            <DesktopIcon key={app.id} app={app} />
           ))}
         </div>
       </div>
@@ -792,6 +822,36 @@ export const Desktop = ({
 
       {/* Window Snap Indicator */}
       <WindowSnapIndicator zone={snapZone} />
+
+      {/* Global Search */}
+      <GlobalSearch
+        open={searchOpen}
+        onClose={() => setSearchOpen(false)}
+        apps={apps}
+        onOpenApp={openWindow}
+      />
+
+      {/* Task View */}
+      <TaskView
+        open={taskViewOpen}
+        onClose={() => setTaskViewOpen(false)}
+        windows={windows}
+        onFocusWindow={focusWindow}
+        onCloseWindow={closeWindow}
+        desktops={desktops}
+        activeDesktopId={activeDesktopId}
+        onSwitchDesktop={switchDesktop}
+        onCreateDesktop={createDesktop}
+      />
+
+      {/* Alt+Tab Switcher */}
+      {altTabActive && altTabWindows.length > 1 && (
+        <AltTabSwitcher 
+          windows={altTabWindows}
+          activeIndex={altTabIndex}
+          isVisible={altTabActive}
+        />
+      )}
 
       {/* Context Menu */}
       {contextMenu && (

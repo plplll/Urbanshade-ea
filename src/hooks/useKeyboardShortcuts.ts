@@ -15,6 +15,9 @@ interface UseKeyboardShortcutsProps {
   onToggleStartMenu: () => void;
   openWindow: (app: any) => void;
   allApps: any[];
+  onToggleSearch?: () => void;
+  onToggleTaskView?: () => void;
+  onLock?: () => void;
 }
 
 export const useKeyboardShortcuts = ({
@@ -24,7 +27,10 @@ export const useKeyboardShortcuts = ({
   onCloseWindow,
   onToggleStartMenu,
   openWindow,
-  allApps
+  allApps,
+  onToggleSearch,
+  onToggleTaskView,
+  onLock
 }: UseKeyboardShortcutsProps) => {
   const [altTabActive, setAltTabActive] = useState(false);
   const [altTabIndex, setAltTabIndex] = useState(0);
@@ -99,11 +105,24 @@ export const useKeyboardShortcuts = ({
       return;
     }
 
-    // Win+L - Lock screen (logout)
+    // Win+S / Ctrl+Space - Open search
+    if ((e.metaKey && e.key === 's') || (e.ctrlKey && e.key === ' ')) {
+      e.preventDefault();
+      onToggleSearch?.();
+      return;
+    }
+
+    // Win+Tab - Task View
+    if (e.metaKey && e.key === 'Tab') {
+      e.preventDefault();
+      onToggleTaskView?.();
+      return;
+    }
+
+    // Win+L - Lock screen
     if (e.metaKey && e.key === 'l') {
       e.preventDefault();
-      // Dispatch logout event
-      window.dispatchEvent(new CustomEvent('system-logout'));
+      onLock?.();
       return;
     }
 
@@ -127,7 +146,7 @@ export const useKeyboardShortcuts = ({
       return;
     }
 
-  }, [sortedWindows, windows, onToggleStartMenu, onMinimizeWindow, onCloseWindow, openWindow, allApps]);
+  }, [sortedWindows, windows, onToggleStartMenu, onMinimizeWindow, onCloseWindow, openWindow, allApps, onToggleSearch, onToggleTaskView, onLock]);
 
   const handleKeyUp = useCallback((e: KeyboardEvent) => {
     // Alt released - confirm alt+tab selection
