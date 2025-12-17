@@ -14,6 +14,60 @@ export type Database = {
   }
   public: {
     Tables: {
+      message_rate_limits: {
+        Row: {
+          blocked_until: string | null
+          message_count: number | null
+          user_id: string
+          window_start: string | null
+        }
+        Insert: {
+          blocked_until?: string | null
+          message_count?: number | null
+          user_id: string
+          window_start?: string | null
+        }
+        Update: {
+          blocked_until?: string | null
+          message_count?: number | null
+          user_id?: string
+          window_start?: string | null
+        }
+        Relationships: []
+      }
+      messages: {
+        Row: {
+          body: string
+          created_at: string | null
+          id: string
+          priority: string | null
+          read_at: string | null
+          recipient_id: string
+          sender_id: string
+          subject: string
+        }
+        Insert: {
+          body: string
+          created_at?: string | null
+          id?: string
+          priority?: string | null
+          read_at?: string | null
+          recipient_id: string
+          sender_id: string
+          subject: string
+        }
+        Update: {
+          body?: string
+          created_at?: string | null
+          id?: string
+          priority?: string | null
+          read_at?: string | null
+          recipient_id?: string
+          sender_id?: string
+          subject?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -130,7 +184,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      check_and_send_message: {
+        Args: {
+          p_body: string
+          p_priority?: string
+          p_recipient_id: string
+          p_subject: string
+        }
+        Returns: Json
+      }
     }
     Enums: {
       [_ in never]: never

@@ -34,14 +34,22 @@ export const ChangelogDialog = () => {
       icon: <Rocket className="w-5 h-5" />,
       color: "from-cyan-500 to-blue-600",
       tagline: "The Mass Update",
-      overview: "A massive overhaul bringing real GitHub package installation, comprehensive account management with nested pages, and polished UI throughout. This update transforms UUR into a fully functional package manager with list-based discovery.",
+      overview: "A massive overhaul bringing real cloud messaging, GitHub package installation, comprehensive account management with nested pages, and polished UI throughout. Send real messages to other UrbanShade users!",
       sections: {
+        "Cloud Messaging": [
+          "NEW: Real messaging system between cloud users",
+          "Send and receive messages with 750 character limit",
+          "Rate limiting: 15 messages per 5 minutes, 1 hour cooldown",
+          "Max 3 pending (unread) messages at a time",
+          "Manual refresh to check for new messages",
+          "Priority levels: Normal, High, Urgent"
+        ],
         "Account Management": [
           "Reorganized /acc-manage into nested routes (/general, /data, /security, /devices, /danger)",
           "Custom profile icons using Lucide icons with color picker",
           "Data deletion controls - delete specific data categories",
           "Device sync history and management",
-          "Factory reset and account deletion options"
+          "Cloud login option in Settings when not signed in"
         ],
         "UUR Package Manager": [
           "NEW: Import package lists from GitHub repositories",
@@ -49,12 +57,8 @@ export const ChangelogDialog = () => {
           "Install packages discovered from imported lists",
           "Real manifest validation and HTML rendering"
         ],
-        "Changelog Improvements": [
-          "Update Overview section for each version",
-          "Scrollable changelog content",
-          "Better version organization"
-        ],
         "Quality & Polish": [
+          "Changelog overview section for each version",
           "Stable 2-minute auto-sync interval",
           "Do Not Disturb mode for notifications",
           "Quick Settings flyout from taskbar"

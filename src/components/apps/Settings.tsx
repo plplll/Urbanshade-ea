@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Settings as SettingsIcon, Monitor, Wifi, Volume2, HardDrive, Users, Clock, Shield, Palette, Accessibility, Bell, Power, Globe, Search, Upload, UserPlus, AlertTriangle, Download, ChevronDown, Code, FileText, Type, Cloud, RefreshCw, LogOut, Trash2, Loader2 } from "lucide-react";
+import { Settings as SettingsIcon, Monitor, Wifi, Volume2, HardDrive, Users, Clock, Shield, Palette, Accessibility, Bell, Power, Globe, Search, Upload, UserPlus, AlertTriangle, Download, ChevronDown, Code, FileText, Type, Cloud, RefreshCw, LogOut, LogIn, Trash2, Loader2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -921,7 +921,7 @@ export const Settings = ({ onUpdate }: { onUpdate?: () => void }) => {
             </div>
 
             {/* Online Account Section - Only visible when signed in */}
-            {isOnlineMode && user && (
+            {isOnlineMode && user ? (
               <Card className="p-6 border-blue-500/30 bg-blue-500/5">
                 <h3 className="font-semibold mb-4 flex items-center gap-2">
                   <Cloud className="w-5 h-5 text-blue-400" />
@@ -949,6 +949,25 @@ export const Settings = ({ onUpdate }: { onUpdate?: () => void }) => {
                   >
                     <LogOut className="w-4 h-4 mr-2" />
                     Sign Out
+                  </Button>
+                </div>
+              </Card>
+            ) : (
+              <Card className="p-6 border-blue-500/30 bg-blue-500/5">
+                <h3 className="font-semibold mb-4 flex items-center gap-2">
+                  <Cloud className="w-5 h-5 text-blue-400" />
+                  Cloud Account
+                </h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Connect to a cloud account to sync your settings across devices and use online features like messaging.
+                </p>
+                <div className="space-y-2">
+                  <Button 
+                    className="w-full bg-blue-600 hover:bg-blue-700"
+                    onClick={() => window.location.href = '/acc-manage/general'}
+                  >
+                    <LogIn className="w-4 h-4 mr-2" />
+                    Sign In to Cloud
                   </Button>
                 </div>
               </Card>

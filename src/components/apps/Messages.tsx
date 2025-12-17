@@ -1,167 +1,100 @@
 import { useState, useEffect } from "react";
-import { Mail, Star, Trash2, AlertTriangle, Send, X, Users } from "lucide-react";
-import { saveState, loadState } from "@/lib/persistence";
+import { Mail, Star, Trash2, AlertTriangle, Send, X, Users, RefreshCw, Cloud, LogIn, Loader2, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
-
-interface Message {
-  id: number;
-  from: string;
-  to?: string;
-  subject: string;
-  preview: string;
-  time: string;
-  read: boolean;
-  starred: boolean;
-  priority: "normal" | "high" | "urgent";
-  body: string;
-}
-
-interface Personnel {
-  name: string;
-  email: string;
-}
+import { useMessages, Message } from "@/hooks/useMessages";
+import { useOnlineAccount } from "@/hooks/useOnlineAccount";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Messages = () => {
-  const [messages, setMessages] = useState<Message[]>(() => 
-    loadState('messages_inbox', [])
-  );
+  const { user, isOnlineMode } = useOnlineAccount();
+  const { 
+    messages, 
+    users, 
+    isLoading, 
+    pendingCount, 
+    isRateLimited, 
+    blockedUntil,
+    fetchMessages, 
+    fetchUsers, 
+    sendMessage, 
+    markAsRead, 
+    deleteMessage 
+  } = useMessages();
 
   const [selected, setSelected] = useState<Message | null>(null);
   const [composing, setComposing] = useState(false);
-  const [compose, setCompose] = useState({ to: "", subject: "", body: "", priority: "normal" as Message["priority"] });
-  const [showPersonnel, setShowPersonnel] = useState(false);
+  const [compose, setCompose] = useState({ 
+    to: "", 
+    toUserId: "",
+    subject: "", 
+    body: "", 
+    priority: "normal" as Message["priority"] 
+  });
+  const [showUserPicker, setShowUserPicker] = useState(false);
+  const [showRateLimitDialog, setShowRateLimitDialog] = useState(false);
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+  const [isSending, setIsSending] = useState(false);
+  const [starredLocal, setStarredLocal] = useState<Set<string>>(new Set());
 
-  // Generate random messages over time
+  // Load starred messages from localStorage
   useEffect(() => {
-    const generateRandomMessage = () => {
-      const possibleMessages: Omit<Message, 'id'>[] = [
-        {
-          from: "Engineering Team",
-          subject: "Routine Maintenance Complete",
-          preview: "Zone 3 power systems have been serviced and tested...",
-          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          read: false,
-          starred: false,
-          priority: "normal",
-          body: "Zone 3 power systems have been serviced and tested.\n\nAll systems functioning within normal parameters.\n\n- Engineering"
-        },
-        {
-          from: "Security Operations",
-          subject: "Shift Change Notification",
-          preview: "Security shift rotation in progress...",
-          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          read: false,
-          starred: false,
-          priority: "normal",
-          body: "Security shift rotation in progress.\n\nAll zones secured. No incidents reported.\n\n- Security Ops"
-        },
-        {
-          from: "Medical Bay",
-          subject: "Crew Health Update",
-          preview: "Weekly health assessment complete for all personnel...",
-          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          read: false,
-          starred: false,
-          priority: "normal",
-          body: "Weekly health assessment complete.\n\nAll personnel in good health. No medical issues reported.\n\n- Dr. Martinez"
-        },
-        {
-          from: "Dr. Chen",
-          subject: "Specimen Observation Notes",
-          preview: "Daily observation log for active specimens...",
-          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          read: false,
-          starred: false,
-          priority: "normal",
-          body: "Daily observation log:\n\nAll specimens stable. No unusual behavior detected today.\n\nZ-13 remains under enhanced monitoring.\n\n- Dr. Chen"
-        },
-        {
-          from: "System Administrator",
-          subject: "Backup Completed",
-          preview: "Automated backup completed successfully...",
-          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          read: false,
-          starred: false,
-          priority: "normal",
-          body: "Automated system backup completed successfully.\n\nAll data secured. Next backup in 24 hours.\n\n- SysAdmin"
-        },
-        {
-          from: "Facility Operations",
-          subject: "Pressure Reading",
-          preview: "External pressure readings within normal range...",
-          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          read: false,
-          starred: false,
-          priority: "normal",
-          body: "External pressure monitoring:\n\nAll readings within normal operational parameters.\n\nDepth: 8,247m\nPressure: Stable\n\n- Operations"
-        },
-        {
-          from: "Research Division",
-          subject: "Data Analysis Complete",
-          preview: "Analysis of recent specimen behavior patterns complete...",
-          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          read: false,
-          starred: false,
-          priority: "normal",
-          body: "Behavior pattern analysis complete.\n\nNo significant anomalies detected. Continuing standard monitoring protocols.\n\n- Research Team"
-        }
-      ];
-
-      const randomMessage = possibleMessages[Math.floor(Math.random() * possibleMessages.length)];
-      const newMessage: Message = {
-        ...randomMessage,
-        id: Date.now()
-      };
-
-      setMessages(prev => {
-        const updated = [newMessage, ...prev];
-        saveState('messages_inbox', updated);
-        return updated;
-      });
-    };
-
-    // Random interval between 2-5 minutes
-    const randomInterval = () => 120000 + Math.random() * 180000;
-    let timeoutId: NodeJS.Timeout;
-
-    const scheduleNext = () => {
-      timeoutId = setTimeout(() => {
-        generateRandomMessage();
-        scheduleNext();
-      }, randomInterval());
-    };
-
-    scheduleNext();
-
-    return () => clearTimeout(timeoutId);
+    const saved = localStorage.getItem('urbanshade_starred_messages');
+    if (saved) {
+      setStarredLocal(new Set(JSON.parse(saved)));
+    }
   }, []);
 
-  // Save messages whenever they change
+  // Show rate limit dialog when blocked
   useEffect(() => {
-    saveState('messages_inbox', messages);
-  }, [messages]);
-
-  const toggleStar = (id: number) => {
-    setMessages(prev => prev.map(msg => 
-      msg.id === id ? { ...msg, starred: !msg.starred } : msg
-    ));
-  };
-
-  const deleteMessage = (id: number) => {
-    setMessages(prev => prev.filter(msg => msg.id !== id));
-    if (selected?.id === id) setSelected(null);
-  };
-
-  const markAsRead = (msg: Message) => {
-    if (!msg.read) {
-      setMessages(prev => prev.map(m => 
-        m.id === msg.id ? { ...m, read: true } : m
-      ));
+    if (isRateLimited) {
+      setShowRateLimitDialog(true);
     }
+  }, [isRateLimited]);
+
+  const isLoggedIn = isOnlineMode && user && supabase;
+
+  const handleRefresh = () => {
+    if (!isLoggedIn) {
+      setShowLoginPrompt(true);
+      return;
+    }
+    fetchMessages();
+    fetchUsers();
+    toast.success("Messages refreshed");
+  };
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      fetchMessages();
+      fetchUsers();
+    }
+  }, [isLoggedIn, fetchMessages, fetchUsers]);
+
+  const toggleStar = (id: string) => {
+    const newStarred = new Set(starredLocal);
+    if (newStarred.has(id)) {
+      newStarred.delete(id);
+    } else {
+      newStarred.add(id);
+    }
+    setStarredLocal(newStarred);
+    localStorage.setItem('urbanshade_starred_messages', JSON.stringify([...newStarred]));
+  };
+
+  const handleSelectMessage = async (msg: Message) => {
     setSelected(msg);
+    if (!msg.read_at) {
+      await markAsRead(msg.id);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    await deleteMessage(id);
+    if (selected?.id === id) setSelected(null);
   };
 
   const getPriorityColor = (priority: string) => {
@@ -172,250 +105,332 @@ export const Messages = () => {
     }
   };
 
-  // Get current user
-  const getCurrentUser = () => {
-    const adminData = localStorage.getItem("urbanshade_admin");
-    if (adminData) {
-      const admin = JSON.parse(adminData);
-      return { name: admin.name, email: admin.email };
-    }
-    return { name: "Administrator", email: "admin@urbanshade.corp" };
+  const selectRecipient = (userId: string, username: string) => {
+    setCompose(prev => ({ ...prev, to: username, toUserId: userId }));
+    setShowUserPicker(false);
   };
 
-  const getPersonnel = (): Personnel[] => {
-    const adminData = localStorage.getItem("urbanshade_admin");
-    const admin = adminData ? JSON.parse(adminData) : { name: "Administrator", email: "admin@urbanshade.corp" };
-    
-    return [
-      admin,
-      { name: "Dr. Sarah Chen", email: "s.chen@urbanshade.corp" },
-      { name: "Marcus Webb", email: "m.webb@urbanshade.corp" },
-      { name: "Dr. James Liu", email: "j.liu@urbanshade.corp" },
-      { name: "Elena Rodriguez", email: "e.rodriguez@urbanshade.corp" },
-      { name: "Dr. Yuki Tanaka", email: "y.tanaka@urbanshade.corp" },
-      { name: "Robert Hayes", email: "r.hayes@urbanshade.corp" },
-      { name: "Dr. Amanda Foster", email: "a.foster@urbanshade.corp" },
-      { name: "Thomas Park", email: "t.park@urbanshade.corp" },
-      { name: "Lisa Morrison", email: "l.morrison@urbanshade.corp" },
-    ];
-  };
-
-  const handleSendMessage = () => {
-    if (!compose.to || !compose.subject || !compose.body) {
+  const handleSendMessage = async () => {
+    if (!compose.toUserId || !compose.subject || !compose.body) {
       toast.error("Please fill in all fields!");
       return;
     }
 
-    const currentUser = getCurrentUser();
-    const recipient = getPersonnel().find(p => p.email === compose.to);
-    
-    if (!recipient) {
-      toast.error("Invalid recipient!");
+    if (compose.body.length > 750) {
+      toast.error("Message too long! Max 750 characters.");
       return;
     }
 
-    // Create sent message
-    const sentMessage: Message = {
-      id: Date.now(),
-      from: currentUser.name,
-      to: compose.to,
-      subject: compose.subject,
-      preview: compose.body.substring(0, 100),
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      read: true,
-      starred: false,
-      priority: compose.priority,
-      body: compose.body
-    };
+    setIsSending(true);
+    const result = await sendMessage(compose.toUserId, compose.subject, compose.body, compose.priority);
+    setIsSending(false);
 
-    // If sending to self, duplicate the message
-    if (compose.to === currentUser.email) {
-      const receivedCopy: Message = {
-        ...sentMessage,
-        id: Date.now() + 1,
-        from: currentUser.name,
-        read: false
-      };
-      setMessages(prev => {
-        const updated = [receivedCopy, sentMessage, ...prev];
-        saveState('messages_inbox', updated);
-        return updated;
-      });
-      toast.success("Message sent! (You sent a message to yourself, so you received a copy)");
+    if (result.success) {
+      toast.success("Message sent!");
+      setCompose({ to: "", toUserId: "", subject: "", body: "", priority: "normal" });
+      setComposing(false);
+    } else if (result.error === 'rate_limited') {
+      setShowRateLimitDialog(true);
     } else {
-      setMessages(prev => {
-        const updated = [sentMessage, ...prev];
-        saveState('messages_inbox', updated);
-        return updated;
-      });
-      toast.success(`Message sent to ${recipient.name}!`);
+      toast.error(result.error || "Failed to send message");
     }
-
-    setCompose({ to: "", subject: "", body: "", priority: "normal" });
-    setComposing(false);
   };
 
-  const selectRecipient = (email: string) => {
-    setCompose(prev => ({ ...prev, to: email }));
-    setShowPersonnel(false);
+  const unreadCount = messages.filter(m => !m.read_at).length;
+
+  const formatTime = (dateStr: string) => {
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return "Just now";
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffDays < 7) return `${diffDays}d ago`;
+    return date.toLocaleDateString();
   };
 
-  const unreadCount = messages.filter(m => !m.read).length;
+  const getRemainingBlockTime = () => {
+    if (!blockedUntil) return "1 hour";
+    const now = new Date();
+    const diff = blockedUntil.getTime() - now.getTime();
+    const mins = Math.ceil(diff / 60000);
+    if (mins <= 0) return "shortly";
+    if (mins < 60) return `${mins} minute${mins > 1 ? 's' : ''}`;
+    return `${Math.ceil(mins / 60)} hour${Math.ceil(mins / 60) > 1 ? 's' : ''}`;
+  };
+
+  // Not logged in view
+  if (!isLoggedIn) {
+    return (
+      <div className="flex h-full items-center justify-center bg-gradient-to-br from-background to-muted/20">
+        <div className="text-center p-8 max-w-md">
+          <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-primary/10 flex items-center justify-center">
+            <Cloud className="w-10 h-10 text-primary" />
+          </div>
+          <h2 className="text-2xl font-bold mb-3">Cloud Messages</h2>
+          <p className="text-muted-foreground mb-6">
+            Connect to a cloud account to send and receive messages from other UrbanShade users.
+          </p>
+          <div className="space-y-3">
+            <Button 
+              className="w-full" 
+              onClick={() => window.location.href = '/acc-manage/general'}
+            >
+              <LogIn className="w-4 h-4 mr-2" />
+              Connect to Cloud
+            </Button>
+            <p className="text-xs text-muted-foreground">
+              Go to Account Settings to sign in or create an account
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-full">
+      {/* Rate Limit Dialog */}
+      <Dialog open={showRateLimitDialog} onOpenChange={setShowRateLimitDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-destructive">
+              <AlertTriangle className="w-5 h-5" />
+              Rate Limited
+            </DialogTitle>
+            <DialogDescription>
+              You've been sending messages too quickly. To prevent spam, messaging has been temporarily disabled.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="p-4 bg-destructive/10 rounded-lg border border-destructive/20">
+            <div className="flex items-center gap-2 text-sm">
+              <Clock className="w-4 h-4" />
+              <span>You can send messages again in <strong>{getRemainingBlockTime()}</strong></span>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setShowRateLimitDialog(false)}>Understood</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Message List */}
-      <div className="w-96 border-r border-white/5">
-        <div className="p-4 border-b border-white/5 bg-black/20">
+      <div className="w-80 border-r border-border flex flex-col">
+        <div className="p-4 border-b border-border bg-card/50">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <Mail className="w-5 h-5 text-primary" />
-              <h2 className="font-bold">Messages</h2>
+              <h2 className="font-bold">Inbox</h2>
             </div>
-            {unreadCount > 0 && (
-              <div className="px-2 py-1 rounded-full bg-destructive/20 text-destructive text-xs font-bold">
-                {unreadCount}
-              </div>
-            )}
+            <div className="flex items-center gap-2">
+              {unreadCount > 0 && (
+                <div className="px-2 py-0.5 rounded-full bg-primary text-primary-foreground text-xs font-bold">
+                  {unreadCount}
+                </div>
+              )}
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-8 w-8"
+                onClick={handleRefresh}
+                disabled={isLoading}
+              >
+                <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+              </Button>
+            </div>
           </div>
-          <Button onClick={() => { setComposing(true); setSelected(null); }} className="w-full" size="sm">
-            <Send className="w-4 h-4 mr-2" />
-            Compose
-          </Button>
+          
+          <div className="flex gap-2">
+            <Button 
+              onClick={() => { setComposing(true); setSelected(null); }} 
+              className="flex-1" 
+              size="sm"
+              disabled={isRateLimited}
+            >
+              <Send className="w-4 h-4 mr-2" />
+              Compose
+            </Button>
+          </div>
+          
+          {pendingCount > 0 && (
+            <div className="mt-2 text-xs text-muted-foreground flex items-center gap-1">
+              <Clock className="w-3 h-3" />
+              {pendingCount}/3 pending messages
+            </div>
+          )}
         </div>
 
-        <div className="overflow-y-auto">
-          {messages.map((msg) => (
-            <div
-              key={msg.id}
-              onClick={() => markAsRead(msg)}
-              className={`p-3 border-b border-white/5 cursor-pointer transition-colors ${
-                selected?.id === msg.id ? "bg-primary/20" : "hover:bg-white/5"
-              } ${!msg.read ? "bg-primary/5" : ""}`}
-            >
-              <div className="flex items-start justify-between mb-1">
-                <div className="flex items-center gap-2 flex-1 min-w-0">
-                  {msg.priority !== "normal" && (
-                    <AlertTriangle className={`w-3 h-3 flex-shrink-0 ${getPriorityColor(msg.priority)}`} />
-                  )}
-                  <span className={`font-bold text-sm truncate ${!msg.read ? "text-primary" : ""}`}>
-                    {msg.from}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleStar(msg.id);
-                    }}
-                    className="hover:scale-110 transition-transform"
-                  >
-                    <Star
-                      className={`w-4 h-4 ${
-                        msg.starred ? "fill-yellow-500 text-yellow-500" : "text-muted-foreground"
-                      }`}
-                    />
-                  </button>
-                  <span className="text-xs text-muted-foreground">{msg.time}</span>
-                </div>
-              </div>
-              <div className={`text-sm mb-1 ${!msg.read ? "font-bold" : ""}`}>
-                {msg.subject}
-              </div>
-              <div className="text-xs text-muted-foreground line-clamp-1">
-                {msg.preview}
-              </div>
+        <div className="flex-1 overflow-y-auto">
+          {isLoading ? (
+            <div className="flex items-center justify-center h-32">
+              <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
             </div>
-          ))}
+          ) : messages.length === 0 ? (
+            <div className="p-4 text-center text-muted-foreground text-sm">
+              <Mail className="w-8 h-8 mx-auto mb-2 opacity-50" />
+              No messages yet
+            </div>
+          ) : (
+            messages.map((msg) => (
+              <div
+                key={msg.id}
+                onClick={() => handleSelectMessage(msg)}
+                className={`p-3 border-b border-border cursor-pointer transition-colors ${
+                  selected?.id === msg.id ? "bg-primary/20" : "hover:bg-muted/50"
+                } ${!msg.read_at ? "bg-primary/5" : ""}`}
+              >
+                <div className="flex items-start justify-between mb-1">
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    {msg.priority !== "normal" && (
+                      <AlertTriangle className={`w-3 h-3 flex-shrink-0 ${getPriorityColor(msg.priority)}`} />
+                    )}
+                    <span className={`font-medium text-sm truncate ${!msg.read_at ? "text-primary font-bold" : ""}`}>
+                      {msg.sender_profile?.display_name || msg.sender_profile?.username || "Unknown"}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1 flex-shrink-0">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleStar(msg.id);
+                      }}
+                      className="hover:scale-110 transition-transform p-1"
+                    >
+                      <Star
+                        className={`w-3 h-3 ${
+                          starredLocal.has(msg.id) ? "fill-yellow-500 text-yellow-500" : "text-muted-foreground"
+                        }`}
+                      />
+                    </button>
+                    <span className="text-xs text-muted-foreground">{formatTime(msg.created_at)}</span>
+                  </div>
+                </div>
+                <div className={`text-sm mb-1 truncate ${!msg.read_at ? "font-semibold" : ""}`}>
+                  {msg.subject}
+                </div>
+                <div className="text-xs text-muted-foreground line-clamp-1">
+                  {msg.body.substring(0, 60)}...
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
 
-      {/* Message Content */}
-      <div className="flex-1 flex flex-col">
+      {/* Message Content / Compose */}
+      <div className="flex-1 flex flex-col bg-background/50">
         {composing ? (
-          <div className="p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold">Compose Message</h3>
-              <Button variant="ghost" size="sm" onClick={() => setComposing(false)}>
-                <X className="w-4 h-4" />
-              </Button>
-            </div>
+          <div className="flex-1 p-6 overflow-y-auto">
+            <div className="max-w-2xl mx-auto">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-bold">New Message</h3>
+                <Button variant="ghost" size="icon" onClick={() => setComposing(false)}>
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
 
-            <div className="space-y-4">
-              <div>
-                <label className="text-sm text-muted-foreground mb-1 block">To</label>
-                <div className="flex gap-2">
-                  <Input
-                    value={compose.to}
-                    onChange={(e) => setCompose(prev => ({ ...prev, to: e.target.value }))}
-                    placeholder="recipient@urbanshade.corp"
-                    className="flex-1"
-                  />
-                  <Button onClick={() => setShowPersonnel(!showPersonnel)} variant="outline">
-                    <Users className="w-4 h-4" />
-                  </Button>
-                </div>
-                
-                {showPersonnel && (
-                  <div className="mt-2 p-2 rounded-lg border border-border bg-background max-h-48 overflow-y-auto">
-                    {getPersonnel().map(person => (
-                      <div
-                        key={person.email}
-                        onClick={() => selectRecipient(person.email)}
-                        className="p-2 hover:bg-accent rounded cursor-pointer text-sm"
-                      >
-                        <div className="font-bold">{person.name}</div>
-                        <div className="text-xs text-muted-foreground">{person.email}</div>
-                      </div>
-                    ))}
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium mb-2 block">To</label>
+                  <div className="flex gap-2">
+                    <Input
+                      value={compose.to}
+                      readOnly
+                      placeholder="Select a recipient..."
+                      className="flex-1 bg-muted/50"
+                    />
+                    <Button onClick={() => setShowUserPicker(!showUserPicker)} variant="outline">
+                      <Users className="w-4 h-4" />
+                    </Button>
                   </div>
-                )}
-              </div>
+                  
+                  {showUserPicker && (
+                    <div className="mt-2 p-2 rounded-lg border border-border bg-card max-h-48 overflow-y-auto">
+                      {users.length === 0 ? (
+                        <div className="p-2 text-sm text-muted-foreground">No other users found</div>
+                      ) : (
+                        users.map(u => (
+                          <div
+                            key={u.user_id}
+                            onClick={() => selectRecipient(u.user_id, u.display_name || u.username)}
+                            className="p-2 hover:bg-muted rounded cursor-pointer text-sm"
+                          >
+                            <div className="font-medium">{u.display_name || u.username}</div>
+                            <div className="text-xs text-muted-foreground">@{u.username}</div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  )}
+                </div>
 
-              <div>
-                <label className="text-sm text-muted-foreground mb-1 block">Priority</label>
-                <select
-                  value={compose.priority}
-                  onChange={(e) => setCompose(prev => ({ ...prev, priority: e.target.value as Message["priority"] }))}
-                  className="w-full px-3 py-2 rounded-lg bg-background border border-border"
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Priority</label>
+                  <select
+                    value={compose.priority}
+                    onChange={(e) => setCompose(prev => ({ ...prev, priority: e.target.value as Message["priority"] }))}
+                    className="w-full px-3 py-2 rounded-lg bg-muted/50 border border-border"
+                  >
+                    <option value="normal">Normal</option>
+                    <option value="high">High</option>
+                    <option value="urgent">Urgent</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Subject</label>
+                  <Input
+                    value={compose.subject}
+                    onChange={(e) => setCompose(prev => ({ ...prev, subject: e.target.value }))}
+                    placeholder="Subject"
+                    maxLength={100}
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Message</label>
+                  <Textarea
+                    value={compose.body}
+                    onChange={(e) => setCompose(prev => ({ ...prev, body: e.target.value.slice(0, 750) }))}
+                    placeholder="Type your message..."
+                    rows={10}
+                    className="resize-none"
+                    maxLength={750}
+                  />
+                  <div className={`text-xs mt-1 text-right ${compose.body.length > 700 ? 'text-yellow-500' : 'text-muted-foreground'} ${compose.body.length >= 750 ? 'text-destructive' : ''}`}>
+                    {compose.body.length}/750
+                  </div>
+                </div>
+
+                <Button 
+                  onClick={handleSendMessage} 
+                  className="w-full" 
+                  disabled={isSending || isRateLimited || !compose.toUserId}
                 >
-                  <option value="normal">Normal</option>
-                  <option value="high">High</option>
-                  <option value="urgent">Urgent</option>
-                </select>
+                  {isSending ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Sending...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-4 h-4 mr-2" />
+                      Send Message
+                    </>
+                  )}
+                </Button>
               </div>
-
-              <div>
-                <label className="text-sm text-muted-foreground mb-1 block">Subject</label>
-                <Input
-                  value={compose.subject}
-                  onChange={(e) => setCompose(prev => ({ ...prev, subject: e.target.value }))}
-                  placeholder="Subject"
-                />
-              </div>
-
-              <div>
-                <label className="text-sm text-muted-foreground mb-1 block">Message</label>
-                <Textarea
-                  value={compose.body}
-                  onChange={(e) => setCompose(prev => ({ ...prev, body: e.target.value }))}
-                  placeholder="Type your message..."
-                  rows={12}
-                  className="resize-none"
-                />
-              </div>
-
-              <Button onClick={handleSendMessage} className="w-full">
-                <Send className="w-4 h-4 mr-2" />
-                Send Message
-              </Button>
             </div>
           </div>
         ) : selected ? (
           <>
-            <div className="p-4 border-b border-white/5 bg-black/20">
-              <div className="flex items-start justify-between mb-3">
-                <div>
+            <div className="p-4 border-b border-border bg-card/30">
+              <div className="flex items-start justify-between mb-2">
+                <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     {selected.priority !== "normal" && (
                       <AlertTriangle className={`w-4 h-4 ${getPriorityColor(selected.priority)}`} />
@@ -423,17 +438,20 @@ export const Messages = () => {
                     <h3 className="font-bold text-lg">{selected.subject}</h3>
                   </div>
                   <div className="text-sm text-muted-foreground">
-                    From: <span className="text-foreground">{selected.from}</span>
-                    {selected.to && <> • To: <span className="text-foreground">{selected.to}</span></>}
-                    {" • "}{selected.time}
+                    From: <span className="text-foreground font-medium">
+                      {selected.sender_profile?.display_name || selected.sender_profile?.username || "Unknown"}
+                    </span>
+                    {" • "}{formatTime(selected.created_at)}
                   </div>
                 </div>
-                <button
-                  onClick={() => deleteMessage(selected.id)}
-                  className="p-2 rounded-lg hover:bg-destructive/20 text-destructive transition-colors"
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handleDelete(selected.id)}
+                  className="text-destructive hover:bg-destructive/10"
                 >
                   <Trash2 className="w-4 h-4" />
-                </button>
+                </Button>
               </div>
 
               {selected.priority === "urgent" && (
@@ -444,14 +462,18 @@ export const Messages = () => {
             </div>
 
             <div className="flex-1 p-6 overflow-y-auto">
-              <pre className="text-sm whitespace-pre-wrap font-sans">
+              <pre className="text-sm whitespace-pre-wrap font-sans leading-relaxed">
                 {selected.body}
               </pre>
             </div>
           </>
         ) : (
-          <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
-            Select a message to read or click Compose to send a new message
+          <div className="flex-1 flex items-center justify-center text-muted-foreground">
+            <div className="text-center">
+              <Mail className="w-12 h-12 mx-auto mb-3 opacity-30" />
+              <p className="text-sm">Select a message or compose a new one</p>
+              <p className="text-xs mt-1">Click refresh to check for new messages</p>
+            </div>
           </div>
         )}
       </div>
