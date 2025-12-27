@@ -51,7 +51,7 @@ export interface FakeModerationAction {
   triggeredAt?: Date;
 }
 
-export type TabId = "console" | "actions" | "terminal" | "storage" | "images" | "bugchecks" | "admin" | "supabase" | "fakemod" | "performance" | "network" | "events" | "components";
+export type TabId = "console" | "actions" | "terminal" | "storage" | "images" | "bugchecks" | "admin" | "supabase" | "fakemod" | "performance" | "network" | "events" | "components" | "mockapi" | "state" | "timetravel";
 
 export const simplifyError = (message: string): string => {
   const simplifications: [RegExp, string][] = [
