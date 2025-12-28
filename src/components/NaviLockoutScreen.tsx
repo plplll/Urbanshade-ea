@@ -12,10 +12,9 @@ interface NaviLockoutScreenProps {
 export const NaviLockoutScreen = ({ reason, lockoutTime, onUnlock }: NaviLockoutScreenProps) => {
   const [showContent, setShowContent] = useState(false);
   const [scanLines, setScanLines] = useState<number[]>([]);
-  const [timeRemaining, setTimeRemaining] = useState(30);
   const [naviMessages, setNaviMessages] = useState<string[]>([]);
 
-  const LOCKOUT_DURATION = 30; // 30 seconds
+  // Lockout is PERMANENT - no countdown needed
 
   useEffect(() => {
     // Black screen first, then reveal
@@ -33,27 +32,26 @@ export const NaviLockoutScreen = ({ reason, lockoutTime, onUnlock }: NaviLockout
     return () => clearTimeout(timer);
   }, []);
 
-  // Countdown timer
+  // NAVI AI messages - lockout is permanent
   useEffect(() => {
     if (!showContent) return;
 
-    const elapsed = (Date.now() - lockoutTime.getTime()) / 1000;
-    const remaining = Math.max(0, LOCKOUT_DURATION - elapsed);
-    setTimeRemaining(Math.ceil(remaining));
+    const messages = [
+      "NAVI: Security violation detected.",
+      "NAVI: Analyzing threat pattern...",
+      "NAVI: User activity flagged as suspicious.",
+      "NAVI: System lockout initiated.",
+      "NAVI: All access permanently revoked.",
+      "NAVI: Refresh page to restore access.",
+      "NAVI: Incident logged for HQ review.",
+    ];
 
-    const interval = setInterval(() => {
-      setTimeRemaining(prev => {
-        if (prev <= 1) {
-          clearInterval(interval);
-          onUnlock?.();
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [showContent, lockoutTime, onUnlock]);
+    messages.forEach((msg, i) => {
+      setTimeout(() => {
+        setNaviMessages(prev => [...prev, msg]);
+      }, i * 600);
+    });
+  }, [showContent]);
 
   // NAVI AI messages
   useEffect(() => {
@@ -191,16 +189,19 @@ export const NaviLockoutScreen = ({ reason, lockoutTime, onUnlock }: NaviLockout
             <span className="text-red-500 animate-pulse">█</span>
           </div>
 
-          {/* Countdown */}
+          {/* Permanent Lockout Notice */}
           <div className="bg-black/40 border border-red-800/30 rounded-lg p-6 text-center">
-            <div className="text-red-500/60 text-xs font-mono mb-2">LOCKOUT EXPIRES IN</div>
-            <div className="text-5xl font-bold text-red-500 font-mono tracking-widest">
-              00:{timeRemaining.toString().padStart(2, '0')}
+            <div className="text-red-500/60 text-xs font-mono mb-2">LOCKOUT STATUS</div>
+            <div className="text-3xl font-bold text-red-500 font-mono tracking-widest mb-2">
+              PERMANENT
+            </div>
+            <div className="text-red-400/60 text-sm font-mono">
+              Refresh page to restore access
             </div>
             <div className="mt-4 h-2 bg-red-950 rounded-full overflow-hidden">
               <div 
-                className="h-full bg-gradient-to-r from-red-700 to-red-500 transition-all duration-1000"
-                style={{ width: `${(timeRemaining / LOCKOUT_DURATION) * 100}%` }}
+                className="h-full bg-gradient-to-r from-red-700 to-red-500 animate-pulse"
+                style={{ width: '100%' }}
               />
             </div>
           </div>

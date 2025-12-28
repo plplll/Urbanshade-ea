@@ -26,7 +26,11 @@ const VIOLATION_THRESHOLDS = {
   LOCKOUT: 7,      // 7 violations = lockout
 };
 
-const LOCKOUT_DURATION = 30000; // 30 seconds lockout (can be increased)
+// Lockout is PERMANENT until page refresh - no auto-expire!
+const LOCKOUT_PERMANENT = true;
+
+// Legacy duration (not used when LOCKOUT_PERMANENT is true)
+const LOCKOUT_DURATION = 999999999; // Effectively permanent
 
 export const useNaviSecurity = () => {
   const { addNotification } = useNotifications();
@@ -75,44 +79,15 @@ export const useNaviSecurity = () => {
     };
   }
 
-  // Persist state
+  // Persist state (but don't persist lockout - it resets on refresh)
   useEffect(() => {
-    localStorage.setItem('navi_security_state', JSON.stringify(state));
+    // Only save non-lockout state to allow refresh to clear lockout
+    if (!state.isLockedOut) {
+      localStorage.setItem('navi_security_state', JSON.stringify(state));
+    }
   }, [state]);
 
-  // Check if lockout has expired
-  useEffect(() => {
-    if (state.isLockedOut && state.lockoutTime) {
-      const lockoutEnd = state.lockoutTime.getTime() + LOCKOUT_DURATION;
-      const remaining = lockoutEnd - Date.now();
-      
-      if (remaining <= 0) {
-        // Lockout expired
-        setState(prev => ({
-          ...prev,
-          isLockedOut: false,
-          lockoutReason: "",
-          lockoutTime: null,
-          warningLevel: 0,
-          violations: [],
-        }));
-      } else {
-        // Set timer to unlock
-        const timer = setTimeout(() => {
-          setState(prev => ({
-            ...prev,
-            isLockedOut: false,
-            lockoutReason: "",
-            lockoutTime: null,
-            warningLevel: 0,
-            violations: [],
-          }));
-        }, remaining);
-        
-        return () => clearTimeout(timer);
-      }
-    }
-  }, [state.isLockedOut, state.lockoutTime]);
+  // Lockout is PERMANENT until page refresh - no auto-expire timer needed!
 
   // Report a security violation
   const reportViolation = useCallback((
