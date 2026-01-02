@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { X, Minimize2, Maximize2, Move, Bug, Terminal, Activity, Globe, Layers, Database, Settings } from "lucide-react";
 import { PerformanceTab } from "./tabs/PerformanceTab";
-import { NetworkTab } from "./tabs/NetworkTab";
+import NetworksTab from "./tabs/NetworksTab";
 import ConsoleTab from "./tabs/ConsoleTab";
 import { LogEntry } from "./hooks/useDefDevState";
 
@@ -198,7 +198,7 @@ const FloatingDefDev = ({ isOpen, onClose }: FloatingDefDevProps) => {
               />
             )}
             {activeTab === 'performance' && <PerformanceTab />}
-            {activeTab === 'network' && <NetworkTab />}
+            {activeTab === 'network' && <NetworksTab />}
           </div>
 
           {/* Resize handle */}

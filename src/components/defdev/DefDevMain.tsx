@@ -16,9 +16,13 @@ import StorageTab from "./tabs/StorageTab";
 import RecoveryTab from "./tabs/RecoveryTab";
 import BugchecksTab from "./tabs/BugchecksTab";
 import { PerformanceTab } from "./tabs/PerformanceTab";
-import { NetworkTab } from "./tabs/NetworkTab";
-import { EventsTab } from "./tabs/EventsTab";
-import { ComponentTab } from "./tabs/ComponentTab";
+import NetworksTab from "./tabs/NetworksTab";
+import EventsDebugTab from "./tabs/EventsDebugTab";
+import ComponentsTab from "./tabs/ComponentsTab";
+import BootAnalyzerTab from "./tabs/BootAnalyzerTab";
+import CrashAnalyzerTab from "./tabs/CrashAnalyzerTab";
+import MemoryProfilerTab from "./tabs/MemoryProfilerTab";
+import ModManagerTab from "./tabs/ModManagerTab";
 import SupabaseTab from "./tabs/SupabaseTab";
 import FakeModTab from "./tabs/FakeModTab";
 import AdminTab from "./tabs/AdminTab";
@@ -340,11 +344,19 @@ const DefDevMain = () => {
       case "performance":
         return <PerformanceTab />;
       case "network":
-        return <NetworkTab />;
+        return <NetworksTab />;
       case "events":
-        return <EventsTab />;
+        return <EventsDebugTab />;
       case "components":
-        return <ComponentTab />;
+        return <ComponentsTab />;
+      case "boot":
+        return <BootAnalyzerTab />;
+      case "crashes":
+        return <CrashAnalyzerTab />;
+      case "memory":
+        return <MemoryProfilerTab />;
+      case "mods":
+        return <ModManagerTab />;
       case "supabase":
         return <SupabaseTab />;
       case "fakemod":
