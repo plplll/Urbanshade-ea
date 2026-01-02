@@ -1,11 +1,9 @@
-import { ArrowLeft, Github, Code, Cloud, TestTube, Lightbulb, Crown } from 'lucide-react';
+import { ArrowLeft, Github, Code, Cloud, TestTube, Lightbulb, Crown, Users, Heart, Waves } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 
 import aswdAvatar from '@/assets/team-aswd.png';
 import plplllAvatar from '@/assets/team-plplll.png';
+import kombainisAvatar from '@/assets/team-kombainis.png';
 
 interface TeamMember {
   name: string;
@@ -14,6 +12,8 @@ interface TeamMember {
   title: string;
   contributions: { icon: React.ReactNode; label: string }[];
   color: string;
+  borderColor: string;
+  textColor: string;
 }
 
 const teamMembers: TeamMember[] = [
@@ -24,10 +24,12 @@ const teamMembers: TeamMember[] = [
     title: "The Architect",
     contributions: [
       { icon: <Code className="w-4 h-4" />, label: "95% of codebase" },
-      { icon: <Crown className="w-4 h-4" />, label: "Founder" },
+      { icon: <Crown className="w-4 h-4" />, label: "Founder of Urbanshade" },
       { icon: <Lightbulb className="w-4 h-4" />, label: "Vision & Direction" },
     ],
-    color: "from-yellow-500/20 to-amber-500/20 border-yellow-500/50",
+    color: "from-yellow-500/20 to-amber-500/20",
+    borderColor: "border-yellow-500/30",
+    textColor: "text-yellow-500",
   },
   {
     name: "plplll",
@@ -40,139 +42,230 @@ const teamMembers: TeamMember[] = [
       { icon: <TestTube className="w-4 h-4" />, label: "Testing" },
       { icon: <Lightbulb className="w-4 h-4" />, label: "Ideas & Feedback" },
     ],
-    color: "from-slate-500/20 to-zinc-500/20 border-slate-500/50",
+    color: "from-slate-500/20 to-zinc-500/20",
+    borderColor: "border-slate-500/30",
+    textColor: "text-slate-400",
   },
   {
     name: "Kombainis_yehaw",
-    avatar: "", // Placeholder - needs image
+    avatar: kombainisAvatar,
     role: "QA Tester",
     title: "The Farmer",
     contributions: [
       { icon: <TestTube className="w-4 h-4" />, label: "Quality Assurance" },
       { icon: <Lightbulb className="w-4 h-4" />, label: "Bug hunting" },
     ],
-    color: "from-green-500/20 to-emerald-500/20 border-green-500/50",
+    color: "from-green-500/20 to-emerald-500/20",
+    borderColor: "border-green-500/30",
+    textColor: "text-green-500",
   },
 ];
 
 const Team = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/30">
+    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black text-foreground">
       {/* Header */}
-      <header className="border-b border-border/50 backdrop-blur-sm bg-background/80 sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Link to="/">
-              <Button variant="ghost" size="sm" className="gap-2">
-                <ArrowLeft className="w-4 h-4" />
-                Back
-              </Button>
-            </Link>
-            <div>
-              <h1 className="text-xl font-bold">The Team</h1>
-              <p className="text-sm text-muted-foreground">The people behind Urbanshade OS</p>
-            </div>
-          </div>
-          <a 
-            href="https://github.com/Urbanshade-Team" 
-            target="_blank" 
-            rel="noopener noreferrer"
-          >
-            <Button variant="outline" size="sm" className="gap-2">
+      <header className="sticky top-0 z-50 border-b border-white/10 bg-black/80 backdrop-blur-sm">
+        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between gap-4">
+          <h1 className="text-xl font-bold text-primary">URBANSHADE Team</h1>
+          <div className="flex items-center gap-3">
+            <a 
+              href="https://github.com/Urbanshade-Team" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-muted-foreground hover:bg-white/10 transition-colors text-sm"
+            >
               <Github className="w-4 h-4" />
               GitHub
-            </Button>
-          </a>
+            </a>
+            <Link 
+              to="/" 
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary/20 border border-primary/30 text-primary hover:bg-primary/30 transition-colors text-sm"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back to App
+            </Link>
+          </div>
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="container mx-auto px-4 py-12">
-        {/* Hero Section */}
-        <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-            Meet the Urbanshade Team
+      {/* Content */}
+      <main className="max-w-4xl mx-auto px-6 py-12 space-y-16">
+        {/* Hero */}
+        <section className="text-center space-y-6">
+          <div className="relative inline-block">
+            <Users className="w-20 h-20 mx-auto text-primary animate-pulse" />
+            <div className="absolute -inset-4 bg-primary/20 blur-xl rounded-full -z-10" />
+          </div>
+          
+          <h2 className="text-5xl font-bold">
+            Meet the <span className="text-primary">URBANSHADE</span> Team
           </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            A small but passionate team dedicated to building the most fun fake OS experience on the web. 
-            We believe in transparency, creativity, and having a good time while coding.
+          
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            A small but mighty crew of developers, testers, and dreamers who decided to build 
+            the most unnecessarily detailed fake OS on the internet. And we regret nothing. 🎮
           </p>
-        </div>
+
+          <div className="flex flex-wrap justify-center gap-4 text-sm text-muted-foreground">
+            <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10">
+              🇱🇻 Made in Latvia
+            </span>
+            <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10">
+              ☕ Fueled by Coffee
+            </span>
+            <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10">
+              🎯 100% Passion Project
+            </span>
+            <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10">
+              🤝 Open to Contributors
+            </span>
+          </div>
+        </section>
+
+        {/* About Section - Placeholder for user */}
+        <section className="p-8 rounded-xl bg-gradient-to-br from-primary/20 via-blue-500/10 to-purple-500/20 border-2 border-primary/40 shadow-xl">
+          <h3 className="text-3xl font-bold mb-6 text-primary flex items-center gap-3">
+            <Waves className="w-8 h-8" />
+            The Story Behind Urbanshade OS
+          </h3>
+          <div className="space-y-4 text-muted-foreground leading-relaxed">
+            <p className="text-lg">
+              Text here :D
+            </p>
+          </div>
+        </section>
+
+        {/* Avatar Disclaimer */}
+        <section className="text-center p-6 rounded-xl bg-amber-500/10 border border-amber-500/30">
+          <p className="text-amber-400 text-lg font-medium">
+            🎮 Because we don't wanna leak our faces, we're gonna use our Roblox avatars lol
+          </p>
+          <p className="text-sm text-muted-foreground mt-2">
+            Privacy first! Also, our avatars are way cooler than our actual faces. Trust us on this one.
+          </p>
+        </section>
 
         {/* Team Grid */}
-        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-          {teamMembers.map((member) => (
-            <Card 
-              key={member.name}
-              className={`relative overflow-hidden bg-gradient-to-br ${member.color} border-2 transition-all duration-300 hover:scale-105 hover:shadow-xl`}
-            >
-              <CardContent className="p-6 text-center">
+        <section className="space-y-8">
+          <h3 className="text-2xl font-bold text-center">The Crew</h3>
+          <p className="text-center text-muted-foreground max-w-xl mx-auto">
+            These are the beautiful humans (represented by beautiful block-shaped avatars) 
+            who made this fever dream of an operating system possible.
+          </p>
+          
+          <div className="grid gap-6 md:grid-cols-3">
+            {teamMembers.map((member) => (
+              <div 
+                key={member.name}
+                className={`p-6 rounded-xl bg-gradient-to-br ${member.color} border ${member.borderColor} hover:scale-[1.02] transition-all text-center group`}
+              >
                 {/* Avatar */}
-                <div className="w-28 h-28 mx-auto mb-4 rounded-full overflow-hidden border-4 border-background/50 shadow-lg">
-                  {member.avatar ? (
-                    <img 
-                      src={member.avatar} 
-                      alt={member.name}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-muted flex items-center justify-center text-3xl">
-                      🌾
-                    </div>
-                  )}
+                <div className="w-32 h-32 mx-auto mb-4 rounded-xl overflow-hidden border-2 border-white/20 shadow-lg bg-black/40">
+                  <img 
+                    src={member.avatar} 
+                    alt={member.name}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
 
                 {/* Name & Role */}
-                <h3 className="text-xl font-bold mb-1">{member.name}</h3>
-                <Badge variant="secondary" className="mb-2">{member.role}</Badge>
-                <p className="text-sm text-muted-foreground italic mb-4">"{member.title}"</p>
+                <h4 className={`text-xl font-bold ${member.textColor} group-hover:underline`}>
+                  {member.name}
+                </h4>
+                <span className="inline-block px-3 py-1 rounded-full bg-black/40 border border-white/10 text-xs text-muted-foreground mt-2">
+                  {member.role}
+                </span>
+                <p className="text-sm text-muted-foreground italic mt-2">"{member.title}"</p>
 
                 {/* Contributions */}
-                <div className="space-y-2">
+                <div className="space-y-2 mt-4">
                   {member.contributions.map((contrib, idx) => (
                     <div 
                       key={idx}
-                      className="flex items-center gap-2 text-sm bg-background/50 rounded-lg px-3 py-2"
+                      className="flex items-center gap-2 text-sm bg-black/30 rounded-lg px-3 py-2 text-muted-foreground"
                     >
-                      {contrib.icon}
+                      <span className={member.textColor}>{contrib.icon}</span>
                       <span>{contrib.label}</span>
                     </div>
                   ))}
                 </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Our Values */}
+        <section className="space-y-6">
+          <h3 className="text-2xl font-bold text-center">What We Believe In</h3>
+          <div className="grid gap-4 md:grid-cols-3">
+            <div className="p-4 rounded-lg bg-black/40 border border-white/10 text-center">
+              <div className="text-3xl mb-2">🔍</div>
+              <h4 className="font-bold text-primary mb-2">Transparency</h4>
+              <p className="text-sm text-muted-foreground">
+                We love being transparent with our users. Open source, open communication, open everything!
+              </p>
+            </div>
+            <div className="p-4 rounded-lg bg-black/40 border border-white/10 text-center">
+              <div className="text-3xl mb-2">🎨</div>
+              <h4 className="font-bold text-primary mb-2">Creativity</h4>
+              <p className="text-sm text-muted-foreground">
+                Why make a normal project when you can make a fully simulated underwater OS? Go big or go home.
+              </p>
+            </div>
+            <div className="p-4 rounded-lg bg-black/40 border border-white/10 text-center">
+              <div className="text-3xl mb-2">🤝</div>
+              <h4 className="font-bold text-primary mb-2">Community</h4>
+              <p className="text-sm text-muted-foreground">
+                Built by the community, for the community. Your feedback shapes what we build next!
+              </p>
+            </div>
+          </div>
+        </section>
 
         {/* Join Section */}
-        <div className="text-center mt-16 p-8 rounded-2xl bg-muted/30 border border-border/50 max-w-2xl mx-auto">
-          <h3 className="text-2xl font-bold mb-3">Want to Join?</h3>
-          <p className="text-muted-foreground mb-4">
-            We're always open to contributors! Whether you want to help with code, testing, 
-            ideas, or just hang out - feel free to reach out.
+        <section className="p-8 rounded-xl bg-gradient-to-br from-green-500/10 to-emerald-500/10 border border-green-500/30 text-center">
+          <Heart className="w-12 h-12 mx-auto text-green-500 mb-4" />
+          <h3 className="text-2xl font-bold mb-3">Want to Join the Team?</h3>
+          <p className="text-muted-foreground max-w-lg mx-auto mb-6">
+            We're always open to new contributors! Whether you want to help with code, testing, 
+            ideas, documentation, or just want to hang out - we'd love to have you.
           </p>
-          <div className="flex gap-4 justify-center">
-            <a href="https://github.com/Urbanshade-Team" target="_blank" rel="noopener noreferrer">
-              <Button className="gap-2">
-                <Github className="w-4 h-4" />
-                Check out our GitHub
-              </Button>
+          <div className="flex gap-4 justify-center flex-wrap">
+            <a 
+              href="https://github.com/Urbanshade-Team" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 px-6 py-3 rounded-lg bg-green-500/20 border border-green-500/30 text-green-400 hover:bg-green-500/30 transition-colors font-medium"
+            >
+              <Github className="w-5 h-5" />
+              Check out our GitHub
             </a>
+            <Link 
+              to="/docs"
+              className="flex items-center gap-2 px-6 py-3 rounded-lg bg-white/5 border border-white/10 text-muted-foreground hover:bg-white/10 transition-colors font-medium"
+            >
+              📚 Read the Docs
+            </Link>
           </div>
-        </div>
-      </main>
+        </section>
 
-      {/* Footer */}
-      <footer className="border-t border-border/50 py-8 mt-12">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>© 2025 Urbanshade Team. Made with ❤️ in Latvia.</p>
-          <div className="flex justify-center gap-4 mt-2">
-            <Link to="/terms" className="hover:text-foreground transition-colors">Terms</Link>
-            <Link to="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
-            <Link to="/docs" className="hover:text-foreground transition-colors">Docs</Link>
+        {/* Footer */}
+        <footer className="text-center pt-8 border-t border-white/10 space-y-4">
+          <p className="text-sm text-muted-foreground">
+            URBANSHADE Team • Made with ❤️ in Latvia • © 2025
+          </p>
+          <div className="flex justify-center gap-6 text-sm">
+            <Link to="/terms" className="text-muted-foreground hover:text-primary transition-colors">Terms</Link>
+            <Link to="/privacy" className="text-muted-foreground hover:text-primary transition-colors">Privacy</Link>
+            <Link to="/docs" className="text-muted-foreground hover:text-primary transition-colors">Docs</Link>
+            <Link to="/status" className="text-muted-foreground hover:text-primary transition-colors">Status</Link>
           </div>
-        </div>
-      </footer>
+          <Link to="/" className="inline-block text-primary hover:underline text-sm font-semibold">
+            ← Return to Simulation
+          </Link>
+        </footer>
+      </main>
     </div>
   );
 };
