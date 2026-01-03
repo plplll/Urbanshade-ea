@@ -1,11 +1,3 @@
-current situation
----
-
-### so.
-the mass update comlpetely fricked the Supabase integration... Whoops \_( :) )_/
-Ima try to fix it. Not really, im sick, and christmas is in like a week, so... no updates probably.
-
-I fked up, i know and im sorry.
 
 # Welcome to the Urbanshade OS (website)!
 ---
