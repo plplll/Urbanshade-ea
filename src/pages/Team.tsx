@@ -1,4 +1,4 @@
-import { ArrowLeft, Github, Code, Cloud, TestTube, Lightbulb, Crown, Users, Heart, Waves } from 'lucide-react';
+import { ArrowLeft, Github, Code, Cloud, TestTube, Lightbulb, Crown, Users, Heart, Waves, GitCommit } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 import aswdAvatar from '@/assets/team-aswd.png';
@@ -223,10 +223,10 @@ const Team = () => {
 
                   {/* Bio */}
                   <div className="flex-1 space-y-4">
-                    {member.isCreator && (
+                {member.isCreator && (
                       <div className="p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/30 mb-4">
                         <p className="text-sm text-yellow-400 font-medium">
-                          👑 This is the person who started it all. The mastermind. The legend. The one who thought "let's make a fake underwater OS" and actually did it.
+                          👑 The guy who said "what if we made a fake OS" and then actually went and did it. Started this mess, still running it.
                         </p>
                       </div>
                     )}
@@ -268,6 +268,22 @@ const Team = () => {
               </p>
             </div>
           </div>
+        </section>
+
+        {/* All Contributors Link */}
+        <section className="p-6 rounded-xl bg-gradient-to-br from-purple-500/10 to-indigo-500/10 border border-purple-500/30 text-center">
+          <GitCommit className="w-10 h-10 mx-auto text-purple-400 mb-3" />
+          <h3 className="text-xl font-bold mb-2">See All Contributors</h3>
+          <p className="text-muted-foreground max-w-lg mx-auto mb-4">
+            Everyone who has ever contributed to Urbanshade, big or small. You helped make this happen!
+          </p>
+          <Link 
+            to="/team/git"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-purple-500/20 border border-purple-500/30 text-purple-400 hover:bg-purple-500/30 transition-colors font-medium"
+          >
+            <Users className="w-5 h-5" />
+            View All Contributors
+          </Link>
         </section>
 
         {/* Join Section */}

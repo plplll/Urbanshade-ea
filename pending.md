@@ -91,6 +91,31 @@ Add a check at app initialization to see if site is locked and show lock screen.
 
 ---
 
+## NAVI AI Bot - Live Announcements
+
+### Overview
+NAVI should be able to send announcements directly to users IN the Messages app, not just using the standard announcement system. This is useful for time-sensitive updates like "Update in 5 minutes!" that need to reach users who are currently online.
+
+### Features Needed
+1. **In-Message Announcements**: NAVI sends messages directly to users' inboxes
+2. **Target Options**:
+   - All users (broadcast)
+   - Currently online users only
+   - Specific user groups (admins, VIPs, etc.)
+3. **Message Types**:
+   - System update notifications
+   - Maintenance warnings
+   - Emergency broadcasts
+   - General announcements
+
+### Implementation Notes
+- Requires real-time messaging infrastructure
+- NAVI messages should be visually distinct (system styling)
+- Should integrate with existing Messages app
+- Consider adding "priority" levels for different urgency
+
+---
+
 ## Notes
 
 - All VIP functionality in the UI is currently using local state/demo mode
