@@ -600,9 +600,20 @@ const ModerationPanel = () => {
 
   const fetchLogs = async () => {
     try {
-      const response = await supabase.functions.invoke('admin-actions/logs', { method: 'GET' });
-      if (response.data?.logs) {
-        setLogs(response.data.logs);
+      // Use query params for GET requests
+      const { data: session } = await supabase.auth.getSession();
+      const response = await fetch(
+        `https://oukxkpihsyikamzldiek.supabase.co/functions/v1/admin-actions?action=logs`,
+        {
+          headers: {
+            'Authorization': `Bearer ${session.session?.access_token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      const result = await response.json();
+      if (result?.logs) {
+        setLogs(result.logs);
       }
     } catch (error) {
       console.error("Fetch logs error:", error);
@@ -653,9 +664,9 @@ const ModerationPanel = () => {
     if (!selectedUser || !warnReason) return;
     
     try {
-      const response = await supabase.functions.invoke('admin-actions/warn', {
+      const response = await supabase.functions.invoke('admin-actions', {
         method: 'POST',
-        body: { targetUserId: selectedUser.user_id, reason: warnReason }
+        body: { action: 'warn', targetUserId: selectedUser.user_id, reason: warnReason }
       });
 
       if (response.error) throw response.error;
@@ -680,9 +691,10 @@ const ModerationPanel = () => {
     if (!selectedUser || !banReason) return;
     
     try {
-      const response = await supabase.functions.invoke('admin-actions/ban', {
+      const response = await supabase.functions.invoke('admin-actions', {
         method: 'POST',
         body: { 
+          action: 'ban',
           targetUserId: selectedUser.user_id, 
           reason: banReason,
           duration: banDuration !== 'perm' ? banDuration : null,
@@ -713,9 +725,9 @@ const ModerationPanel = () => {
 
   const handleUnban = async (userId: string) => {
     try {
-      const response = await supabase.functions.invoke('admin-actions/unban', {
+      const response = await supabase.functions.invoke('admin-actions', {
         method: 'POST',
-        body: { targetUserId: userId }
+        body: { action: 'unban', targetUserId: userId }
       });
 
       if (response.error) throw response.error;
@@ -781,9 +793,9 @@ const ModerationPanel = () => {
     }
     
     try {
-      const response = await supabase.functions.invoke('admin-actions/op', {
+      const response = await supabase.functions.invoke('admin-actions', {
         method: 'POST',
-        body: { targetUserId: selectedUser.user_id }
+        body: { action: 'op', targetUserId: selectedUser.user_id }
       });
 
       if (response.error) throw response.error;
@@ -825,9 +837,9 @@ const ModerationPanel = () => {
     }
     
     try {
-      const response = await supabase.functions.invoke('admin-actions/broadcast', {
+      const response = await supabase.functions.invoke('admin-actions', {
         method: 'POST',
-        body: { message: broadcastMessage }
+        body: { action: 'broadcast', message: broadcastMessage }
       });
 
       if (response.error) throw response.error;

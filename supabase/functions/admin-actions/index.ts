@@ -55,12 +55,13 @@ Deno.serve(async (req) => {
 
     console.log(`Admin ${user.id} accessing admin actions`);
 
-    const url = new URL(req.url);
-    const action = url.pathname.split('/').pop();
-
-    // Handle different actions
+    // Handle different actions based on method
     if (req.method === 'GET') {
-      if (action === 'users' || url.pathname.endsWith('/admin-actions')) {
+      // Parse action from URL search params for GET requests
+      const url = new URL(req.url);
+      const action = url.searchParams.get('action') || 'users';
+      
+      if (action === 'users') {
         // Get all users with their profiles and moderation status
         const { data: profiles, error } = await supabaseAdmin
           .from('profiles')
@@ -80,9 +81,15 @@ Deno.serve(async (req) => {
           .from('user_roles')
           .select('*');
 
+        // Get VIPs
+        const { data: vips } = await supabaseAdmin
+          .from('vips')
+          .select('*');
+
         const usersWithStatus = profiles?.map(p => {
           const userActions = moderationActions?.filter(a => a.target_user_id === p.user_id) || [];
           const userRole = roles?.find(r => r.user_id === p.user_id);
+          const isVip = vips?.some(v => v.user_id === p.user_id);
           const activeBan = userActions.find(a => 
             (a.action_type === 'temp_ban' || a.action_type === 'perm_ban') && 
             (!a.expires_at || new Date(a.expires_at) > new Date())
@@ -92,6 +99,7 @@ Deno.serve(async (req) => {
           return {
             ...p,
             role: userRole?.role || 'user',
+            isVip,
             isBanned: !!activeBan,
             banInfo: activeBan,
             warningsCount: warnings.length,
@@ -139,9 +147,7 @@ Deno.serve(async (req) => {
           .from('site_locks')
           .select('*')
           .eq('id', 'global')
-          .single();
-
-        if (error) throw error;
+          .maybeSingle();
 
         return new Response(JSON.stringify({ lock }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -162,10 +168,25 @@ Deno.serve(async (req) => {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
       }
+
+      return new Response(JSON.stringify({ error: 'Invalid GET action' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
     }
 
     if (req.method === 'POST') {
       const body = await req.json();
+      const action = body.action;
+      
+      if (!action) {
+        return new Response(JSON.stringify({ error: 'Missing action in request body' }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+      
+      console.log(`Processing action: ${action}`);
       
       if (action === 'warn') {
         const { targetUserId, reason } = body;
@@ -241,7 +262,7 @@ Deno.serve(async (req) => {
         });
       }
 
-      if (action === 'ip-ban') {
+      if (action === 'ip_ban') {
         const { targetIp, reason } = body;
         
         const { data, error } = await supabaseAdmin
@@ -320,24 +341,52 @@ Deno.serve(async (req) => {
       if (action === 'lock_site') {
         const { reason } = body;
         
-        const { data, error } = await supabaseAdmin
+        // First try to update, if no rows affected, insert
+        const { data: existing } = await supabaseAdmin
           .from('site_locks')
-          .update({
-            is_locked: true,
-            lock_reason: reason,
-            locked_at: new Date().toISOString(),
-            locked_by: user.id
-          })
+          .select('id')
           .eq('id', 'global')
-          .select()
-          .single();
+          .maybeSingle();
 
-        if (error) throw error;
-        console.log(`Admin ${user.id} locked site: ${reason}`);
+        if (existing) {
+          const { data, error } = await supabaseAdmin
+            .from('site_locks')
+            .update({
+              is_locked: true,
+              lock_reason: reason,
+              locked_at: new Date().toISOString(),
+              locked_by: user.id
+            })
+            .eq('id', 'global')
+            .select()
+            .single();
 
-        return new Response(JSON.stringify({ success: true, lock: data }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
+          if (error) throw error;
+          console.log(`Admin ${user.id} locked site: ${reason}`);
+
+          return new Response(JSON.stringify({ success: true, lock: data }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        } else {
+          const { data, error } = await supabaseAdmin
+            .from('site_locks')
+            .insert({
+              id: 'global',
+              is_locked: true,
+              lock_reason: reason,
+              locked_at: new Date().toISOString(),
+              locked_by: user.id
+            })
+            .select()
+            .single();
+
+          if (error) throw error;
+          console.log(`Admin ${user.id} locked site: ${reason}`);
+
+          return new Response(JSON.stringify({ success: true, lock: data }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
       }
 
       if (action === 'unlock_site') {
@@ -386,10 +435,99 @@ Deno.serve(async (req) => {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
       }
+
+      // =============================================
+      // OP/DEOP ACTIONS (Grant/Revoke Admin)
+      // =============================================
+      
+      if (action === 'op') {
+        const { targetUserId } = body;
+        
+        // Check if already has admin role
+        const { data: existing } = await supabaseAdmin
+          .from('user_roles')
+          .select('id')
+          .eq('user_id', targetUserId)
+          .eq('role', 'admin')
+          .maybeSingle();
+
+        if (existing) {
+          return new Response(JSON.stringify({ error: 'User is already an admin' }), {
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+
+        const { data, error } = await supabaseAdmin
+          .from('user_roles')
+          .insert({
+            user_id: targetUserId,
+            role: 'admin',
+            granted_by: user.id
+          })
+          .select()
+          .single();
+
+        if (error) throw error;
+        console.log(`Admin ${user.id} granted admin to user ${targetUserId}`);
+
+        return new Response(JSON.stringify({ success: true, role: data }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+
+      if (action === 'deop') {
+        const { targetUserId } = body;
+        
+        const { error } = await supabaseAdmin
+          .from('user_roles')
+          .delete()
+          .eq('user_id', targetUserId)
+          .eq('role', 'admin');
+
+        if (error) throw error;
+        console.log(`Admin ${user.id} revoked admin from user ${targetUserId}`);
+
+        return new Response(JSON.stringify({ success: true }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+
+      // =============================================
+      // BROADCAST ACTION
+      // =============================================
+      
+      if (action === 'broadcast') {
+        const { message } = body;
+        
+        // Store broadcast as a NAVI message with critical priority
+        const { data, error } = await supabaseAdmin
+          .from('navi_messages')
+          .insert({
+            message,
+            priority: 'critical',
+            target_audience: 'all',
+            sent_by: user.id
+          })
+          .select()
+          .single();
+
+        if (error) throw error;
+        console.log(`Admin ${user.id} sent broadcast: ${message.substring(0, 50)}...`);
+
+        return new Response(JSON.stringify({ success: true, broadcast: data }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+
+      return new Response(JSON.stringify({ error: `Invalid action: ${action}` }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
     }
 
-    return new Response(JSON.stringify({ error: 'Invalid action' }), {
-      status: 400,
+    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+      status: 405,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
 
