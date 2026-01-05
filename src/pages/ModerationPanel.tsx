@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { NaviMonitoringTab } from "@/components/moderation/NaviMonitoringTab";
 import { NaviAuthoritiesTab } from "@/components/moderation/NaviAuthoritiesTab";
+import { NaviAutonomousPanel } from "@/components/moderation/NaviAutonomousPanel";
 import { StatsTab } from "@/components/moderation/StatsTab";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -1251,6 +1252,9 @@ const ModerationPanel = () => {
               <TabsTrigger value="stats" className="gap-2 data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400">
                 <BarChart3 className="w-4 h-4" /> Stats
               </TabsTrigger>
+              <TabsTrigger value="autonomous" className="gap-2 data-[state=active]:bg-amber-500/20 data-[state=active]:text-amber-400">
+                <Zap className="w-4 h-4" /> Autonomous
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="users" className="m-0">
@@ -1542,6 +1546,10 @@ const ModerationPanel = () => {
 
             <TabsContent value="stats" className="m-0">
               <StatsTab users={users} />
+            </TabsContent>
+
+            <TabsContent value="autonomous" className="m-0">
+              <NaviAutonomousPanel />
             </TabsContent>
           </Tabs>
         </div>
