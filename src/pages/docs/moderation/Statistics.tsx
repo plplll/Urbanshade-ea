@@ -163,7 +163,7 @@ const Statistics = () => {
             <Button variant="outline">← Moderation Actions</Button>
           </Link>
           <Link to="/docs/moderation">
-            <Button variant="outline">Back to Overview</Button>
+            <Button variant="outline">Back to Moderation</Button>
           </Link>
         </div>
       </main>

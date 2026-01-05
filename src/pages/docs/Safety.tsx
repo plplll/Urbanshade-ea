@@ -15,7 +15,7 @@ const Safety = () => {
       description: "Tips for keeping your account secure with strong passwords and privacy settings.",
       icon: Lock,
       color: "cyan",
-      path: "/docs/safety/account-safety"
+      path: "/docs/safety/account"
     },
     {
       title: "Reporting",

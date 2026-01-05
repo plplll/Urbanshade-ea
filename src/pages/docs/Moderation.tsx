@@ -15,7 +15,7 @@ const Moderation = () => {
       description: "Real-time insights into NAVI bot activity, message filtering, and lockout events.",
       icon: Eye,
       color: "cyan",
-      path: "/docs/moderation/navi-monitor"
+      path: "/docs/moderation/navi"
     },
     {
       title: "Actions",
@@ -29,7 +29,7 @@ const Moderation = () => {
       description: "Analytics dashboard with user growth, moderation metrics, and activity heatmaps.",
       icon: BarChart3,
       color: "blue",
-      path: "/docs/moderation/statistics"
+      path: "/docs/moderation/stats"
     }
   ];
 

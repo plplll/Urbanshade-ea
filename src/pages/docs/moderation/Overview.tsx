@@ -39,11 +39,11 @@ const ModerationOverview = () => {
         <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
           <h1 className="text-xl font-bold text-red-400">Moderation Overview</h1>
           <Link 
-            to="/docs" 
+            to="/docs/moderation" 
             className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary/20 border border-primary/30 text-primary hover:bg-primary/30 transition-colors text-sm"
           >
             <ArrowLeft className="w-4 h-4" />
-            Back to Docs
+            Back to Moderation
           </Link>
         </div>
       </header>
