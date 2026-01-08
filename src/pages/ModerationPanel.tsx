@@ -251,7 +251,7 @@ const StatusCard = ({ status, onUpdate }: { status: StatusEntry; onUpdate: (id: 
 };
 
 // User details panel
-const UserDetailsPanel = ({ user, onClose, onWarn, onBan, onUnban, onOp, onDeop, onVip, onRevokeVip, isDemo }: { 
+const UserDetailsPanel = ({ user, onClose, onWarn, onBan, onUnban, onOp, onDeop, onVip, onRevokeVip, isDemo, isCreator }: { 
   user: UserData; 
   onClose: () => void;
   onWarn: () => void;
@@ -262,6 +262,7 @@ const UserDetailsPanel = ({ user, onClose, onWarn, onBan, onUnban, onOp, onDeop,
   onVip: () => void;
   onRevokeVip: () => void;
   isDemo: boolean;
+  isCreator: boolean;
 }) => {
   const rank = user.personnelRank || (user.role === 'admin' ? 'Admin' : user.isVip ? 'VIP' : 'Staff');
   
@@ -425,8 +426,8 @@ const UserDetailsPanel = ({ user, onClose, onWarn, onBan, onUnban, onOp, onDeop,
             </Button>
           </>
         ) : (
-          /* Demote button for admins (demo mode only) */
-          isDemo && (
+          /* Demote button for admins - available to creators only (or in demo mode) */
+          (isDemo || isCreator) && (
             <Button 
               onClick={onDeop}
               className="w-full bg-orange-600 hover:bg-orange-500 gap-2"
@@ -512,6 +513,7 @@ const ModerationPanel = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isCreator, setIsCreator] = useState(false);
   const [isDemoMode, setIsDemoMode] = useState(false);
   const [users, setUsers] = useState<UserData[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -597,6 +599,7 @@ const ModerationPanel = () => {
         }
 
         setIsAdmin(true);
+        setIsCreator(response.data.isCreator || false);
         setUsers(response.data.users || []);
         
         // Add activity
@@ -1013,23 +1016,49 @@ const ModerationPanel = () => {
     }, ...prev]);
   };
 
-  // Handle demo de-op (demote admin)
-  const handleDemoDeop = () => {
+  // Handle de-op (demote admin) - real and demo
+  const handleDeop = async () => {
     if (!selectedUser) return;
     
-    const updatedUsers = users.map(u => 
-      u.id === selectedUser.id ? { ...u, role: 'user' } : u
-    );
-    setUsers(updatedUsers);
-    toast.success(`[DEMO] Admin demoted: ${selectedUser.username}`);
-    setActivities(prev => [{
-      id: Date.now().toString(),
-      type: "system",
-      user: selectedUser.username,
-      message: `[DEMO] Admin demoted: @${selectedUser.username} is now a regular user`,
-      timestamp: new Date()
-    }, ...prev]);
-    setShowUserDetails(false);
+    if (isDemoMode) {
+      const updatedUsers = users.map(u => 
+        u.id === selectedUser.id ? { ...u, role: 'user' } : u
+      );
+      setUsers(updatedUsers);
+      toast.success(`[DEMO] Admin demoted: ${selectedUser.username}`);
+      setActivities(prev => [{
+        id: Date.now().toString(),
+        type: "system",
+        user: selectedUser.username,
+        message: `[DEMO] Admin demoted: @${selectedUser.username} is now a regular user`,
+        timestamp: new Date()
+      }, ...prev]);
+      setShowUserDetails(false);
+      return;
+    }
+    
+    try {
+      const response = await supabase.functions.invoke('admin-actions', {
+        method: 'POST',
+        body: { action: 'deop', targetUserId: selectedUser.user_id }
+      });
+
+      if (response.error) throw response.error;
+      
+      toast.success(`Admin demoted: ${selectedUser.username}`);
+      setActivities(prev => [{
+        id: Date.now().toString(),
+        type: "system",
+        user: selectedUser.username,
+        message: `👑 Admin demoted: @${selectedUser.username} is now a regular user`,
+        timestamp: new Date()
+      }, ...prev]);
+      setShowUserDetails(false);
+      fetchUsers();
+    } catch (error: any) {
+      console.error("Deop error:", error);
+      toast.error(error?.message || "Failed to demote admin");
+    }
   };
 
   // Handle VIP grant
@@ -1606,10 +1635,11 @@ const ModerationPanel = () => {
           onBan={() => setShowBanDialog(true)}
           onUnban={() => isDemoMode ? handleDemoUnban(selectedUser.user_id) : handleUnban(selectedUser.user_id)}
           onOp={() => setShowOpDialog(true)}
-          onDeop={handleDemoDeop}
+          onDeop={handleDeop}
           onVip={() => setShowVipDialog(true)}
           onRevokeVip={handleRevokeVip}
           isDemo={isDemoMode}
+          isCreator={isCreator}
         />
       )}
 

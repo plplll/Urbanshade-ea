@@ -392,6 +392,54 @@ export type Database = {
         }
         Relationships: []
       }
+      reports: {
+        Row: {
+          assigned_admin_id: string | null
+          created_at: string | null
+          description: string
+          id: string
+          priority: string | null
+          report_type: string
+          reported_user_id: string | null
+          reporter_id: string | null
+          resolution_notes: string | null
+          resolved_at: string | null
+          status: string
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          assigned_admin_id?: string | null
+          created_at?: string | null
+          description: string
+          id?: string
+          priority?: string | null
+          report_type: string
+          reported_user_id?: string | null
+          reporter_id?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          status?: string
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          assigned_admin_id?: string | null
+          created_at?: string | null
+          description?: string
+          id?: string
+          priority?: string | null
+          report_type?: string
+          reported_user_id?: string | null
+          reporter_id?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          status?: string
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       site_locks: {
         Row: {
           id: string
@@ -506,6 +554,33 @@ export type Database = {
           last_sync?: string
           system_settings?: Json | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      test_emergencies: {
+        Row: {
+          ended_at: string | null
+          fake_data: Json | null
+          id: string
+          initiated_by: string | null
+          is_active: boolean | null
+          started_at: string | null
+        }
+        Insert: {
+          ended_at?: string | null
+          fake_data?: Json | null
+          id?: string
+          initiated_by?: string | null
+          is_active?: boolean | null
+          started_at?: string | null
+        }
+        Update: {
+          ended_at?: string | null
+          fake_data?: Json | null
+          id?: string
+          initiated_by?: string | null
+          is_active?: boolean | null
+          started_at?: string | null
         }
         Relationships: []
       }

@@ -112,7 +112,7 @@ Deno.serve(async (req) => {
           };
         });
 
-        return new Response(JSON.stringify({ users: usersWithStatus }), {
+        return new Response(JSON.stringify({ users: usersWithStatus, isCreator }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
       }
